@@ -8,6 +8,8 @@ import { ReportsModule } from "./reports/reports.module";
 import { CommonModule } from "./common/common.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
+import { Process } from "./process/entities/process.entity";
+import { Team } from "./team/entities/team.entity";
 
 @Module({
     imports: [
@@ -20,6 +22,7 @@ import { ConfigModule } from "@nestjs/config";
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             autoLoadEntities: true,
+            entities:[Process,Team],
             synchronize: true
         }),
         UsersModule,

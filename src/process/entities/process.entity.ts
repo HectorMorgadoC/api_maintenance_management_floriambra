@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable prettier/prettier */
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Team } from "src/team/entities/team.entity";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Process {
@@ -19,8 +20,14 @@ export class Process {
         length: 200,
     })
         description: string;
-
-
+    
+    @OneToMany(
+        () => Team,
+        (team) => team.process,
+        { cascade: true }
+    )
+        team: Team[];
+    
         @BeforeInsert()
         checkNaneInsert() { 
             this.name = this.name
