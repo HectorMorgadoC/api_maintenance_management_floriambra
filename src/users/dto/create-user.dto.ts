@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsString, IsUUID, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsOptional, IsString, IsUUID, MaxLength, MinLength, Matches } from "class-validator";
 
 export class CreateUserDto {
     
@@ -9,13 +9,26 @@ export class CreateUserDto {
     @MinLength(10)
         username: string;
 
+    @IsString()
+    @IsEmail()
+    @IsOptional()
+        email?: string;
+
     @IsUUID()
-	    id_process: string;
+    @IsOptional()
+	    process?: string;
 
     @IsString()
     @MaxLength(20)
-	    access_level: string;
+    @IsOptional()
+	    access_level?: string;
 
     @IsString()
-	    password: string;
+    @MinLength(6)
+    @MaxLength(50)
+    @Matches(
+        /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+            message: 'The password must have a Uppercase, lowercase letter and a number'
+        })
+        password: string;
 }
