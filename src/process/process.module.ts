@@ -9,5 +9,6 @@ import { Process } from "./entities/process.entity";
     controllers: [ProcessController],
     providers: [ProcessService],
     imports: [TypeOrmModule.forFeature([Process])],
+    exports: [ProcessService],
 })
 export class ProcessModule {}

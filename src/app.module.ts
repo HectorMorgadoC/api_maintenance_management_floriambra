@@ -10,7 +10,9 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { Process } from "./process/entities/process.entity";
 import { Team } from "./team/entities/team.entity";
-
+import { Order } from "./orders/entities/order.entity";
+import { Report } from "./reports/entities/report.entity";
+import { User } from "./users/entities/user.entity";
 @Module({
     imports: [
         ConfigModule.forRoot(),
@@ -22,7 +24,7 @@ import { Team } from "./team/entities/team.entity";
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             autoLoadEntities: true,
-            entities:[Process,Team],
+            entities:[Process,Team,Order,Report,User],
             synchronize: true
         }),
         UsersModule,

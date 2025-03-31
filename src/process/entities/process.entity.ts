@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable prettier/prettier */
 import { Team } from "src/team/entities/team.entity";
+import { User } from "src/users/entities/user.entity";
 import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -26,7 +27,14 @@ export class Process {
         (team) => team.process,
         { cascade: true }
     )
-        team: Team[];
+        team: Team;
+
+    @OneToMany(
+        () => User,
+        (user) => user.process,
+        { cascade: true, eager: true }
+    )
+        user: User;
     
         @BeforeInsert()
         checkNaneInsert() { 

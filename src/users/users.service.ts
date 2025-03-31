@@ -1,27 +1,200 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable indent */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { User } from "./entities/user.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { DeepPartial, Repository } from "typeorm";
+import * as bcrypt from 'bcrypt';
+import { DataSource } from "typeorm";
+import { JwtPayload } from "./interfaces/jwt-payload.interface";
+import { JwtService } from "@nestjs/jwt";
+import { LoginDto } from "./dto/login-user.dto";
 
 @Injectable()
 export class UsersService {
-  create(_createUserDto: CreateUserDto) {
-    return "This action adds a new user";
-  }
+    constructor(
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
 
-  findAll() {
-    return `This action returns all users`;
-  }
+        private readonly dataSource: DataSource,
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+        private readonly jwtService: JwtService
+    ) {}
+    
 
-  update(id: number, _updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+    async login(loginDto: LoginDto) {
+      const { password, username } = loginDto;
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+      const user = await this.userRepository.findOne({
+        where: { username },
+        select: { 
+          username: true, 
+          password: true, 
+          id: true, 
+          access_level: true, 
+          process: { name: true } 
+        }
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Credentials are not valid (username)');
+      }
+
+      if (!bcrypt.compareSync(password, user.password)) {
+        throw new UnauthorizedException('Credentials are not valid (password)');
+      }
+
+      const token = this.getJwtToken({ access_level: user.access_level, process: user.process?.name, username: user.username });
+
+      return {
+        user: {
+          username: user.username,
+          access_level: user.access_level
+        },
+        token
+      };
+    }
+
+    async create(_createUserDto: CreateUserDto) {
+        
+        try {
+            const { password, ...rest } = _createUserDto as DeepPartial<User>;
+            const user = this.userRepository.create(
+                {
+                ...rest,
+                    password: bcrypt.hashSync( password as string, 10 ),
+                }
+            );
+            
+            await this.userRepository.save(user);
+            return {
+                username: user.username,
+                access_level: user.access_level
+            };
+        } catch (error) {
+            this.handleDBException( error );
+        }
+    }
+
+    async findAll() {
+        const user = await this.userRepository.find({
+            relations: ["process"]
+        });
+        const userReturn = user.map( ( user ) => {
+          if (!user.process) {
+            return {
+              id: user.id,
+              username: user.username,
+              access_level: user.access_level,
+              email: user.email,
+              process: "unassigned"
+            };
+          }
+  
+          return {
+            id: user.id,
+            username: user.username,
+            access_level: user.access_level,
+            email: user.email,
+            process: user.process.name
+          };
+        });
+        return userReturn;
+    }
+
+    async findOnePlain(id: string) {
+        const user = await this.userRepository.findOne({ where: { id }, relations: ["process"] });
+
+        if (!user) {
+            throw new NotFoundException(`User with id: ${id} not found`);
+        }
+
+        if (!user.process) {
+          return {
+            id: user.id,
+            username: user.username,
+            access_level: user.access_level,
+            email: user.email,
+            process: "unassigned"
+          };
+        }
+
+        return {
+          id: user.id,
+          username: user.username,
+          access_level: user.access_level,
+          email: user.email,
+          process: user.process.name
+        };
+    }
+
+    async update(id: string, _updateUserDto: UpdateUserDto) {
+        const { process, access_level,...rest } = _updateUserDto;
+        
+        const existingUser = await this.userRepository.findOne({ where: { id }, relations: ["process"] });
+
+        if (!existingUser) {
+          throw new NotFoundException(`User with id: ${id} not found`);
+        }
+
+        const userPreload = await this.userRepository.preload( { 
+          id,
+          ...rest as DeepPartial<User>,
+          process: process ? { id: process } : existingUser.process,
+          access_level: access_level ? access_level : existingUser.access_level
+        } as DeepPartial<User>);
+
+        if (!userPreload) {
+            throw new NotFoundException(`User with id: ${id} not found`);
+        }
+
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(userPreload);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+            return await this.findOnePlain(id);
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleDBException( error );
+        } 
+        
+    }
+
+    async remove(id: string) {
+        const query = this.userRepository.createQueryBuilder('user');
+        try {
+            await query.delete().where("id = :id", { id }).execute();
+        } catch (error) {
+            this.handleDBException( error );
+        }
+    }
+
+    private getJwtToken( payload: JwtPayload ) {
+      const token = this.jwtService.sign( payload );
+      return token
+    }
+  
+
+    private handleDBException( error: any ): never {
+    
+        if ( error.code === '23505' )
+            throw new BadRequestException( error.detail );
+
+        console.log(error)
+
+        throw new InternalServerErrorException('Please check server logs')
+    }
+
 }

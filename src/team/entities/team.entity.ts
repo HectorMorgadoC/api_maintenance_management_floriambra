@@ -22,11 +22,6 @@ export class Team {
         description: string;
 
     @Column({
-        type: "uuid",
-    })
-        id_process: string;
-
-    @Column({
         type: "varchar",
         length: 40,
     })
@@ -54,5 +49,6 @@ export class Team {
         () => Process, 
         (process) => process.team)
         process: Process;    
+    order: any;
 }
 

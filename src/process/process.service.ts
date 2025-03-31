@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { CreateProcessDto } from "./dto/create-process.dto";
 import { UpdateProcessDto } from "./dto/update-process.dto";
-import { DeepPartial, Repository } from "typeorm";
+import { DataSource, DeepPartial, Repository } from "typeorm";
 import { Process } from "./entities/process.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -15,7 +15,9 @@ export class ProcessService {
     constructor(
 
         @InjectRepository(Process)
-        private readonly processRepository: Repository<Process>
+        private readonly processRepository: Repository<Process>,
+
+        private readonly dataSource: DataSource
     
     ){}
 
@@ -33,23 +35,85 @@ export class ProcessService {
             this.handleDbExceptions( error )
         }
         
-        return newProcess
+        return {
+            name: newProcess.name,
+            description: newProcess.description
+        }
     }
 
     async findAll() {
-        return await this.processRepository.find() 
+        try {
+            const processes = await this.processRepository.find() 
+            
+            return processes.map(process => {
+                return {
+                    id: process.id,
+                    name: process.name,
+                    description: process.description
+                }
+            })
+
+        } catch (error) {
+            this.handleDbExceptions(error)
+        }
     }
 
-    findOne(id: string) {
-        return `This action returns a #${id} process`;
+    async findOnePlain(id: string) {
+        const process = await this.processRepository.findOne({ where: { id } })
+
+        if (!process) {
+            throw new NotFoundException(`Process with id: ${id} not found`);
+        }
+
+        return {
+            name: process.name,
+            description: process.description
+        }
     }
 
-    update(id: string, _updateProcessDto: UpdateProcessDto) {
-        return `This action updates a #${id} process`;
+    async update(id: string, _updateProcessDto: UpdateProcessDto) {
+        const updatedProcess = _updateProcessDto;
+
+        const existingProcess = await this.processRepository.findOne({ where: { id } })
+
+        if (!existingProcess) {
+            throw new NotFoundException(`Process with id: ${id} not found`);
+        }
+
+        const processPreload = await this.processRepository.preload({
+            id,
+            ...updatedProcess as DeepPartial<Process>
+        })
+
+        if (!processPreload) {
+            throw new NotFoundException(`Process with id: ${id} not found`);
+        }
+
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(processPreload);
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+            return await this.findOnePlain(id);
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleDbExceptions(error);
+        }
+
+        return processPreload;
     }
 
-    remove(id: string) {
-        return `This action removes a #${id} process`;
+    async remove(id: string) {
+        const query = this.processRepository.createQueryBuilder('process');
+        try {
+            await query.delete().where("id = :id", { id }).execute();
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
     }
 
     private handleDbExceptions(error: any) {
