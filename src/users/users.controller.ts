@@ -48,17 +48,17 @@ export class UsersController {
         console.log(user.username);
         return this.usersService.findAll();
     }
-
+  
     @Patch(":id")
     @Auth(AccessLevel.admin)
     update(
-        @GetUser() user: User,
-        @Param("id", ParseUUIDPipe) id: string,
-        @Body() updateUserDto: UpdateUserDto,
+      @GetUser() user: User,
+      @Param("id", ParseUUIDPipe) id: string,
+      @Body() updateUserDto: UpdateUserDto,
     ) {
         return this.usersService.update(id, updateUserDto);
     }
-
+  
     @Delete(":id")
     @Auth(AccessLevel.admin)
     remove(@Param("id", ParseUUIDPipe) id: string) {
