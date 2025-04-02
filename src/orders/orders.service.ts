@@ -1,30 +1,225 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
+import { DataSource, DeepPartial, Repository } from "typeorm";
+import { Order } from "./entities/order.entity";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class OrdersService {
-    create(_createOrderDto: CreateOrderDto) {
-        return "This action adds a new order";
+
+    private readonly logger = new Logger(OrdersService.name)
+    constructor(
+
+        @InjectRepository(Order)
+        private readonly orderRepository: Repository<Order> ,
+
+        private readonly dataSourse: DataSource
+
+    ){}
+
+    async create(_createOrderDto: CreateOrderDto) {
+
+        
+        const newOrder = this.orderRepository.create(_createOrderDto as DeepPartial<Order>)
+        
+        try {         
+            
+            const savedOrder = await this.orderRepository.save(newOrder);
+            
+            const newRegisterOrder = await this.orderRepository.findOne({
+                where: { id: savedOrder.id },
+                relations: ["user", "team","team.process"]
+            });
+
+            if (!newRegisterOrder) {
+                throw new InternalServerErrorException('Error retrieving created order');
+            }
+
+            if (!newRegisterOrder.team.process) {
+                return {
+                    id: newRegisterOrder.id,
+                    date: newRegisterOrder.notice_date,
+                    user: newRegisterOrder.user.username,
+                    process: "unassigned",
+                    team: newRegisterOrder.team.name,
+                    description: newRegisterOrder.fault_description
+                }
+            }
+
+            return {
+                id: newRegisterOrder.id,
+                date: newRegisterOrder.notice_date,
+                user: newRegisterOrder.user.username,
+                process: newRegisterOrder.team.process.name,
+                team: newRegisterOrder.team.name,
+                description: newRegisterOrder.fault_description
+            }
+        } catch (error) {
+            this.handleDbExceptions(error)
+        }
+
+        return _createOrderDto;
     }
 
-    //findAll() {
-    //    return `This action returns all orders`;
-    //}
 
-    findOne(_paginationDto: PaginationDto) {
-        console.log(typeof(_paginationDto.date_time))
-        return _paginationDto;
+    async findWithFilters(_paginationDto: PaginationDto) {
+        const { team, user, date_time } = _paginationDto;
+
+        const queryBuilder = this.orderRepository.createQueryBuilder("order")
+            .leftJoinAndSelect("order.team", "team")
+            .leftJoinAndSelect("order.user", "user")
+            .leftJoinAndSelect("team.process", "process");
+            
+        
+        if (team) {
+            queryBuilder.andWhere('team.id = :teamId', { teamId: team });
+        }
+        
+        if (user) {
+            queryBuilder.andWhere('user.id = :userId', { userId: user });
+        }
+
+
+        if (date_time) {
+            const dateObj = new Date(date_time);
+            queryBuilder.andWhere('DATE(order.notice_date) = DATE(:date)', { 
+                date: dateObj.toISOString() 
+            });
+        }
+
+        const orders = await queryBuilder.getMany();
+        
+        return orders.map(order => {
+
+            if(!order.team.process) {
+                return {
+                    id: order.id,
+                    date: order.notice_date,
+                    description: order.fault_description,
+                    state: order.order_state,
+                    user: order.user.username,
+                    process: "unassigned" 
+                }
+            }
+
+            return {
+                id: order.id,
+                date: order.notice_date,
+                description: order.fault_description,
+                state: order.order_state,
+                user: order.user.username,
+                process: order.team.process.name 
+            }
+        });
     }
 
-    update(id: number, _updateOrderDto: UpdateOrderDto) {
-        return `This action updates a #${id} order`;
+
+    async findOnePlain(id: string) {
+        try {
+            return this.orderRepository.findOne({
+                where: { id }, 
+                relations: ["team","user","team.process"]
+            })
+        } catch (error) {
+            this.handleDbExceptions(error)
+        }
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} order`;
+    async update(id: string, _updateOrderDto: UpdateOrderDto) {
+        const { notice_date, ...res } = _updateOrderDto;
+
+        const existingOrder = await this.orderRepository.findOne({ where: { id }})
+        
+        if (!existingOrder) {
+            throw new NotFoundException(`Order with id: ${id} not found`);
+        }
+
+        const orderPreload = await this.orderRepository.preload({
+            id,
+            notice_date: notice_date ? notice_date : existingOrder.notice_date,
+            ...res as DeepPartial<Order>
+        })
+
+        if (!orderPreload) {
+            throw new NotFoundException(`Order with id: ${id} not found`);
+        }
+
+        const queryRunner = this.dataSourse.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            await queryRunner.manager.save(orderPreload);        
+            await queryRunner.commitTransaction();
+            await queryRunner.release();
+            const updatedEquipment =  await this.findOnePlain(id);
+
+            if (!updatedEquipment) {
+                throw new BadRequestException("Modified equipment request error")
+            }
+
+            
+            if (!updatedEquipment) {
+                throw new BadRequestException("Modified equipment request error")
+            }
+
+            if (!updatedEquipment.team.process) {
+                return {
+                    id: updatedEquipment.id,
+                    username: updatedEquipment.user.username,
+                    description: updatedEquipment.fault_description,
+                    team: updatedEquipment.team.name,
+                    notice_date: updatedEquipment.notice_date,
+                    process: "unassigned"
+                };
+            }
+
+            return {
+                id: updatedEquipment.id,
+                username: updatedEquipment.user.username,
+                description: updatedEquipment.fault_description,
+                team: updatedEquipment.team.name,
+                notice_date: updatedEquipment.notice_date,
+                process: updatedEquipment.team.process.name
+            };
+            
+        } catch (error) {
+            await queryRunner.rollbackTransaction();
+            await queryRunner.release();
+            this.handleDbExceptions(error);
+        }
+    }
+
+    async remove(id: string) {
+        const order = await this.orderRepository.findOne({ where: { id } });
+        
+        if (!order) {
+            throw new NotFoundException(`Order with id: ${id} not found`);
+        }
+
+        const query = this.orderRepository.createQueryBuilder('order');
+        try {
+            await query.delete().where("id = :id", { id }).execute();
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
+    }
+
+    private handleDbExceptions(error: any) {
+        if (error.code === "23505") {
+            throw new BadRequestException(error.detail);
+        }
+
+        if (error.code === "23503") {
+            throw new BadRequestException(error.detail);
+        }
+
+        this.logger.error(error);
+        throw new InternalServerErrorException("Unexpected error, check server logs");
     }
 }

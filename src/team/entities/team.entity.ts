@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable prettier/prettier */
+import { Order } from "src/orders/entities/order.entity";
 import { Process } from "src/process/entities/process.entity";
-import { Column, Entity, ManyToOne,PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne,OneToMany,PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Team {
@@ -34,21 +35,24 @@ export class Team {
         model: string;
 
     @Column({
-        type: "varchar",
-        length: 10,
+        type: "int",
     })
-        working_voltage: string;
+        working_voltage: number;
 
     @Column({
-        type: "varchar",
-        length: 10,
+        type: "int",
     })
-        kilowatts: string;
+        kilowatts: number;
 
     @ManyToOne(
         () => Process, 
-        (process) => process.team)
-        process: Process;    
-    order: any;
+        (process) => process.id,
+        { onDelete: "CASCADE" })
+        process: Process;
+
+    @OneToMany(() => Order, 
+        (order) => order.team)
+        order: Order;
+    
 }
 

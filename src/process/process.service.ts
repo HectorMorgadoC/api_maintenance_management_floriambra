@@ -28,17 +28,17 @@ export class ProcessService {
 
         try {
 
-            await this.processRepository.save(newProcess);  
+            const newRegisterProcess  = await this.processRepository.save(newProcess);
+
+            return {
+                id: newRegisterProcess.id,
+                name: newRegisterProcess.name,
+                description: newRegisterProcess.description
+            }
             
         } catch (error) {
-
             this.handleDbExceptions( error )
-        }
-        
-        return {
-            name: newProcess.name,
-            description: newProcess.description
-        }
+        }       
     }
 
     async findAll() {
@@ -108,6 +108,12 @@ export class ProcessService {
     }
 
     async remove(id: string) {
+        const process = await this.processRepository.findOne({ where: { id } });
+        
+        if (!process) {
+            throw new NotFoundException(`Process with id: ${id} not found`);
+        }
+
         const query = this.processRepository.createQueryBuilder('process');
         try {
             await query.delete().where("id = :id", { id }).execute();

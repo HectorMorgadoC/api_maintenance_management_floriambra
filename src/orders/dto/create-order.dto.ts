@@ -1,30 +1,32 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
     IsBoolean,
-    IsISO8601,
     IsOptional,
     IsString,
     IsUUID,
-    Max,
+    Matches,
+    MaxLength,
+    MinLength,
 } from "class-validator";
 
 export class CreateOrderDto {
     @IsUUID()
-        id_process: string;
+        team: string;
     
     @IsUUID()
-        id_team: string;
-    
-    @IsUUID()
-        id_applicant: string;
+        user: string;
     
     @IsString()
-    @IsISO8601()
-        date_time: string;
+    @Matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, {
+        message: 'The date must be in the exact format YYYY-MM-DDTHH:mm:ss.SSSZ',
+    })
+        notice_date: string;
     
     @IsString()
-    @Max(200)
+    @MinLength(10)
+    @MaxLength(200)
         fault_description: string;
     
     @IsBoolean()

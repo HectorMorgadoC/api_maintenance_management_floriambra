@@ -25,7 +25,10 @@ import { User } from "./users/entities/user.entity";
             password: process.env.DB_PASSWORD,
             autoLoadEntities: true,
             entities:[Process,Team,Order,Report,User],
-            synchronize: true
+            synchronize: true,
+            extra: { 
+                timezone: 'Z'
+            }
         }),
         UsersModule,
         TeamModule,

@@ -8,8 +8,9 @@ export class CreateTeamDto {
     @MaxLength(50)
         name: string;
 
-    @IsUUID()
-	    id_process: string;
+    @IsString()
+    @MaxLength(200)
+        description: string;
 
     @IsString()
     @MaxLength(40)
@@ -31,4 +32,8 @@ export class CreateTeamDto {
     @IsPositive()
     @IsOptional()
 	    kilowatts: number;
+
+    @IsUUID()
+    @IsOptional()
+        process?: string;
 }

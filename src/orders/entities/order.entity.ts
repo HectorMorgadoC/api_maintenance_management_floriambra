@@ -1,3 +1,5 @@
+/* eslint-disable indent */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable prettier/prettier */
 import { Team } from "src/team/entities/team.entity";
@@ -11,11 +13,22 @@ export class Order {
     @PrimaryGeneratedColumn("uuid")
         id: string;
 
-    @Column({
-        type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP",
-    })
-        notice_date: string;
+        @Column({
+            type: 'varchar', 
+            transformer: {
+                to: (value: Date | string | null): string | null => {
+                    if (!value) return null;
+                    const date = new Date(value);
+
+                    return date.toISOString();
+                },
+                from: (value: string | null): string | null => {
+
+                    return value;
+                }
+            }
+        })
+        notice_date: string; 
 
     @Column({
         type: "varchar",

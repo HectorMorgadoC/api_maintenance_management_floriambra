@@ -17,7 +17,7 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 
-@Controller("orders")
+@Controller("order")
 export class OrdersController {
     constructor(private readonly ordersService: OrdersService) {}
 
@@ -26,15 +26,10 @@ export class OrdersController {
             return this.ordersService.create(createOrderDto);
         }
 
-    //@Get()
-    //findAll() {
-    //    return this.ordersService.findAll();
-    //}
-
     @Get()
     findOne(@Query() _paginationDto: PaginationDto) {
         console.log(_paginationDto.date_time);
-        return this.ordersService.findOne(_paginationDto);
+        return this.ordersService.findWithFilters(_paginationDto);
     }
 
     @Patch(":id")
@@ -42,11 +37,11 @@ export class OrdersController {
         @Param("id", ParseUUIDPipe) id: string,
         @Body() updateOrderDto: UpdateOrderDto,
     ) {
-        return this.ordersService.update(+id, updateOrderDto);
+        return this.ordersService.update(id, updateOrderDto);
     }
 
     @Delete(":id")
     remove(@Param("id") id: string) {
-        return this.ordersService.remove(+id);
+        return this.ordersService.remove(id);
     }
 }
