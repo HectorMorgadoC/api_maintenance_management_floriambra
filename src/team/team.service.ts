@@ -110,6 +110,7 @@ export class TeamService {
             }
 
             if (!updatedEquipment.process) {
+                
                 return {
                     id: updatedEquipment.id,
                     name: updatedEquipment.name,
@@ -130,7 +131,7 @@ export class TeamService {
                 model: updatedEquipment.model,
                 working_voltage: updatedEquipment.working_voltage,
                 kilowatts: updatedEquipment.kilowatts,
-                process: updatedEquipment.name
+                process: updatedEquipment.process.name
             };
             
         } catch (error) {

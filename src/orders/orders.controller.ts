@@ -27,8 +27,7 @@ export class OrdersController {
         }
 
     @Get()
-    findOne(@Query() _paginationDto: PaginationDto) {
-        console.log(_paginationDto.date_time);
+    findWithFilters(@Query() _paginationDto: PaginationDto) {
         return this.ordersService.findWithFilters(_paginationDto);
     }
 

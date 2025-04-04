@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
@@ -24,7 +24,6 @@ export class OrdersService {
 
     async create(_createOrderDto: CreateOrderDto) {
 
-        
         const newOrder = this.orderRepository.create(_createOrderDto as DeepPartial<Order>)
         
         try {         
@@ -68,7 +67,7 @@ export class OrdersService {
 
 
     async findWithFilters(_paginationDto: PaginationDto) {
-        const { team, user, date_time } = _paginationDto;
+        const { team, user, date_time, order_state } = _paginationDto;
 
         const queryBuilder = this.orderRepository.createQueryBuilder("order")
             .leftJoinAndSelect("order.team", "team")
@@ -94,7 +93,21 @@ export class OrdersService {
 
         const orders = await queryBuilder.getMany();
         
-        return orders.map(order => {
+        const listOrders = orders.filter( order => {
+            if (order.order_state && order_state) {
+                return {
+                    order
+                }
+            } else if (!order.order_state && !order_state) {
+                return {
+                    order
+                }
+            }
+        })
+
+        
+        return listOrders.map( order => {
+            console.log( order )
 
             if(!order.team.process) {
                 return {
@@ -106,7 +119,7 @@ export class OrdersService {
                     process: "unassigned" 
                 }
             }
-
+    
             return {
                 id: order.id,
                 date: order.notice_date,
@@ -115,8 +128,10 @@ export class OrdersService {
                 user: order.user.username,
                 process: order.team.process.name 
             }
-        });
+        }) 
+        
     }
+
 
 
     async findOnePlain(id: string) {
@@ -163,11 +178,6 @@ export class OrdersService {
                 throw new BadRequestException("Modified equipment request error")
             }
 
-            
-            if (!updatedEquipment) {
-                throw new BadRequestException("Modified equipment request error")
-            }
-
             if (!updatedEquipment.team.process) {
                 return {
                     id: updatedEquipment.id,
@@ -194,6 +204,52 @@ export class OrdersService {
             this.handleDbExceptions(error);
         }
     }
+
+    async updateStateOrder(order_state: boolean, id: string) {
+        
+        const existingOrder = await this.orderRepository.findOne({ where: { id }})
+        
+        if (!existingOrder) {
+            throw new NotFoundException(`Order with id: ${id} not found`);
+        }
+
+        if (existingOrder.order_state) {
+            throw new HttpException(
+                {
+                    statusCode: HttpStatus.NOT_MODIFIED,
+                    message: 'Closed order'
+                },
+                HttpStatus.NOT_MODIFIED
+            );
+        }
+
+        const reportPreload = await this.orderRepository.preload({
+            id,
+            order_state
+        })
+
+        if (!reportPreload) {
+            throw new NotFoundException(`Order with id: ${id} not found`);
+        }
+
+        try {
+            await this.orderRepository.save(reportPreload);
+            const updatedReport = await this.findOnePlain(id);
+            
+            if (!updatedReport) {
+                throw new BadRequestException("Modified order request error");
+            }
+            
+
+            return {
+                order_state: updatedReport.order_state
+            };
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
+    }
+
+
 
     async remove(id: string) {
         const order = await this.orderRepository.findOne({ where: { id } });

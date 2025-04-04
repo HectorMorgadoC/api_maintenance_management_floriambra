@@ -2,39 +2,44 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
     IsBoolean,
-    IsISO8601,
     IsOptional,
     IsString,
     IsUUID,
+    Matches,
     MaxLength,
 } from "class-validator";
 
 export class CreateReportDto {
     @IsUUID()
-        id_work_order: string;
+        order: string;
     
     @IsUUID()
-        id_responsible_technician: string;
+        user: string;
     
     @IsString()
     @MaxLength(100)
-        collaborators: string;
+    @IsOptional()
+        collaborators?: string;
     
     @IsString()
-    @MaxLength(20)
+    @MaxLength(30)
         fault_type: string;
     
     @IsString()
-    @MaxLength(20)
+    @MaxLength(30)
         type_of_maintenance: string;
     
     @IsString()
-    @IsISO8601({ strict: true })
-        from_date: Date;
+    @Matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, {
+        message: 'The date must be in the exact format YYYY-MM-DDTHH:mm:ss.SSSZ',
+    })
+        from_date: string;
     
     @IsString()
-    @IsISO8601({ strict: true })
-        end_date: Date;
+    @Matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, {
+        message: 'The date must be in the exact format YYYY-MM-DDTHH:mm:ss.SSSZ',
+    })
+        end_date: string;
     
     @IsString()
     @MaxLength(300)
@@ -48,7 +53,7 @@ export class CreateReportDto {
     @IsString()
     @MaxLength(300)
     @IsOptional()
-        remarks: string;
+        remarks?: string;
     
     @IsBoolean()
     @IsOptional()

@@ -51,7 +51,8 @@ export class User {
     order: Order;
 
     @OneToMany(() => Report, 
-    (report) => report.user)
+    (report) => report.user,
+    {cascade: true })
     report: Report;
     
 }

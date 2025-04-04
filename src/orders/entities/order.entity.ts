@@ -56,4 +56,5 @@ export class Order {
         () => Report, 
         (report) => report.order)
         report: Report;
+        
 }

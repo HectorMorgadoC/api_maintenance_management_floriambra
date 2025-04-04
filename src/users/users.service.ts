@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -16,6 +17,10 @@ import { DataSource } from "typeorm";
 import { JwtPayload } from "./interfaces/jwt-payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { LoginDto } from "./dto/login-user.dto";
+import { AccessLevel } from "./interfaces/access-level.inteface";
+
+import { ProcessService } from "src/process/process.service";
+import { TeamService } from "src/team/team.service";
 
 @Injectable()
 export class UsersService {
@@ -25,12 +30,18 @@ export class UsersService {
 
         private readonly dataSource: DataSource,
 
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+
+        private readonly teamService: TeamService,
+
+        private readonly processService: ProcessService
     ) {}
     
 
     async login(loginDto: LoginDto) {
       const { password, username } = loginDto;
+
+      // const accessLevel: AccessLevel = AccessLevel.admin;
 
       const user = await this.userRepository.findOne({
         where: { username },
@@ -40,7 +51,8 @@ export class UsersService {
           id: true, 
           access_level: true, 
           process: { name: true } 
-        }
+        },
+        relations:["process"]
       });
 
       if (!user) {
@@ -53,13 +65,70 @@ export class UsersService {
 
       const token = this.getJwtToken({ access_level: user.access_level, process: user.process?.name, username: user.username });
 
+      const teams = await this.teamService.findAll()
+      const process = await this.processService.findAll()
+
+      
+      if ( user.access_level === AccessLevel.admin ) {
+        return {
+          user: {
+            username: user.username,
+            access_level: user.access_level,
+            teams: teams,
+            process: process
+          },
+          token
+        };
+      }
+
+      if ( user.access_level === AccessLevel.production_supervisor ) {
+        return {
+          user: {
+            username: user.username,
+            access_level: user.access_level,
+            teams: teams,
+          },
+          token
+        };
+      }
+
+
+      if ( user.access_level === AccessLevel.operator ) {
+        if ( !user.process ) {
+          return {
+            user: {
+              username: user.username,
+              access_level: user.access_level,
+              teams: []
+            },
+            token
+          }
+          
+        } else {
+        return {
+          user: {
+            username: user.username,
+            access_level: user.access_level,
+            teams: teams?.filter( team => {
+              if ( user.process.name === team.process ) 
+              return {
+                team
+              }
+            })
+          },
+          token
+        
+        }
+        }
+      }
+
       return {
         user: {
           username: user.username,
-          access_level: user.access_level
+          access_level: user.access_level,
         },
         token
-      };
+      }
     }
 
     async create(_createUserDto: CreateUserDto) {

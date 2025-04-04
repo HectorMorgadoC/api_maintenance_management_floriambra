@@ -11,6 +11,7 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { TeamModule } from "src/team/team.module";
 
 
 @Module({
@@ -31,7 +32,9 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
                 signOptions: { expiresIn: configService.get('JWT_EXPIRATION') },
                 }
             }
-        })
+        }),
+        TeamModule,
+        ProcessModule
     ],
     exports: [UsersService, TypeOrmModule, JwtStrategy, PassportModule, JwtModule]
 })

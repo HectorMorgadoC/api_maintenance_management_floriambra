@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable prettier/prettier */
-import { IsISO8601, IsOptional, IsString, IsUUID, MinLength } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsBoolean, IsISO8601, IsOptional, IsString, IsUUID, MinLength } from "class-validator";
 
 export class PaginationDto {
     
@@ -22,6 +23,12 @@ export class PaginationDto {
     @IsString()
     @IsISO8601({strict: true}) 
     date_time?: Date;
+
+
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
+        order_state?: boolean
 
 }
 

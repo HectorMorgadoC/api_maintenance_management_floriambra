@@ -10,6 +10,6 @@ import { ProcessModule } from "src/process/process.module";
     controllers: [TeamController],
     providers: [TeamService],
     imports: [TypeOrmModule.forFeature([Team]), ProcessModule],
-    exports: [ TeamModule ]
+    exports: [ TeamService ]
 })
 export class TeamModule {}

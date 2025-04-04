@@ -4,7 +4,7 @@
 /* eslint-disable prettier/prettier */
 import { Order } from "src/orders/entities/order.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 
 
@@ -14,17 +14,60 @@ export class Report {
     id: string;
 
     @Column({
-        type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP",
-    })
-    front_date: string;
+        type: 'varchar', 
+            transformer: {
+                to: (value: Date | string | null): string | null => {
+                    if (!value) return null;
+                    const date = new Date(value);
+
+                    return date.toISOString();
+                },
+                from: (value: string | null): string | null => {
+
+                    return value;
+                }
+            }
+        })
+    from_date: string;
 
     @Column({
-        type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP",
-    })
+        type: 'varchar', 
+            transformer: {
+                to: (value: Date | string | null): string | null => {
+                    if (!value) return null;
+                    const date = new Date(value);
+
+                    return date.toISOString();
+                },
+                from: (value: string | null): string | null => {
+
+                    return value;
+                }
+            }
+        })
     end_date: string;
 
+    @Column({
+        type: "varchar",
+        length: 50,
+        nullable: true
+    })
+        collaborators: string;
+    
+    @Column({
+        type: "varchar",
+        length: 30,
+        nullable: true
+    })
+        fault_type: string;
+    
+    @Column({
+        type: "varchar",
+        length: 30,
+        nullable: true
+    })
+        type_of_maintenance: string;
+    
     @Column({
         type: "varchar",
         length: 300,
@@ -34,12 +77,14 @@ export class Report {
     @Column({
         type: "varchar",
         length: 200,
+        nullable: true
     })
     used_spare_parts: string;
 
     @Column({
         type: "varchar",
         length: 300,
+        nullable: true
     })
     remarks: string;
 
@@ -57,11 +102,13 @@ export class Report {
     
     @ManyToOne(
         () => User, 
-        (user) => user.report)
+        (user) => user.report
+        )
         user: User;
 
     @OneToOne(
         () => Order, 
         (order) => order.report)
+        @JoinColumn() // define la clave foranea  
         order: Order;
 }
