@@ -249,8 +249,6 @@ export class OrdersService {
         }
     }
 
-
-
     async remove(id: string) {
         const order = await this.orderRepository.findOne({ where: { id } });
         
@@ -261,6 +259,23 @@ export class OrdersService {
         const query = this.orderRepository.createQueryBuilder('order');
         try {
             await query.delete().where("id = :id", { id }).execute();
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
+    }
+
+    async removeForUser(id: string) {
+
+        const orders = await this.orderRepository.find({ 
+            where: { user: { id } } 
+        });
+
+        if (!orders) {
+            throw new NotFoundException(`No orders were found for user with ID: ${id}`);
+        }
+
+        try {
+            await this.orderRepository.remove(orders);
         } catch (error) {
             this.handleDbExceptions(error);
         }

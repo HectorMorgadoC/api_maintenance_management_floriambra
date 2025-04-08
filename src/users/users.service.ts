@@ -21,6 +21,8 @@ import { AccessLevel } from "./interfaces/access-level.inteface";
 
 import { ProcessService } from "src/process/process.service";
 import { TeamService } from "src/team/team.service";
+import { ReportsService } from "src/reports/reports.service";
+import { OrdersService } from "src/orders/orders.service";
 
 @Injectable()
 export class UsersService {
@@ -34,7 +36,11 @@ export class UsersService {
 
         private readonly teamService: TeamService,
 
-        private readonly processService: ProcessService
+        private readonly processService: ProcessService,
+
+        private readonly reportsService: ReportsService,
+
+        private readonly ordersService: OrdersService
     ) {}
     
 
@@ -241,13 +247,29 @@ export class UsersService {
         
     }
 
-    async remove(id: string) {
+    async remove(idUser: string) {
+
+        const { id } = await this.findOnePlain( idUser )
         const query = this.userRepository.createQueryBuilder('user');
-        try {
-            await query.delete().where("id = :id", { id }).execute();
-        } catch (error) {
-            this.handleDBException( error );
+
+        if (!id ) {
+          throw new NotFoundException(`User with id: ${id} not found`)
         }
+
+        try {
+
+          await this.reportsService.removeForUser( id )
+
+          await this.reportsService.removeForIdUserOrder( id )
+  
+          await this.ordersService.removeForUser( id )
+
+          await query.delete().where("id = :id", { id }).execute();
+
+        } catch (error) {
+          this.handleDBException( error )
+        }
+        
     }
 
     private getJwtToken( payload: JwtPayload ) {

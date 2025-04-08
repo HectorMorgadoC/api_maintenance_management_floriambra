@@ -10,6 +10,8 @@ import { Report } from "./entities/report.entity"
 import { InjectRepository } from "@nestjs/typeorm";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { OrdersService } from "src/orders/orders.service";
+import { UsersService } from "src/users/users.service";
+import { User } from "src/users/entities/user.entity";
 
 @Injectable()
 export class ReportsService {
@@ -22,7 +24,10 @@ export class ReportsService {
 
         private readonly orderService: OrdersService,
 
-        private readonly dataSourse: DataSource
+        private readonly dataSourse: DataSource,
+
+       // private readonly userService: UsersService
+
     ){}
 
     async create(_createReportDto: CreateReportDto) {
@@ -285,6 +290,43 @@ export class ReportsService {
         const query = this.reportRepository.createQueryBuilder('report');
         try {
             await query.delete().where("id = :id", { id }).execute();
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
+    }
+
+    async removeForUser(id: string) {
+
+        const reports = await this.reportRepository.find({ 
+            where: { user: { id } } 
+        });
+
+        if (!reports) {
+            throw new NotFoundException(`No reports were found for user with ID: ${id}`);
+        }
+
+        try {
+            await this.reportRepository.remove(reports);
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
+    }
+
+    async removeForIdUserOrder(id: string) {
+        const reports = await this.reportRepository.find({ 
+            where: { 
+                order: { user: { id } }
+            },
+            relations: ['order', 'order.user']
+        });
+
+        if (!reports) {
+            throw new NotFoundException(`No report found for user with ID: ${id} and the specified order`);
+        }
+
+        try {
+            const remover = await this.reportRepository.remove(reports);
+            console.log( "2",remover )
         } catch (error) {
             this.handleDbExceptions(error);
         }

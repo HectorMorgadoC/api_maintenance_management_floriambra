@@ -7,9 +7,13 @@ import { Report } from "./entities/report.entity";
 import { OrdersModule } from "src/orders/orders.module";
 
 
+
 @Module({
-    controllers: [ReportsController],
-    providers: [ReportsService],
-    imports: [TypeOrmModule.forFeature([Report]),OrdersModule],
+    controllers: [ ReportsController ],
+    providers: [ ReportsService ],
+    imports: [ TypeOrmModule.forFeature([Report] ),
+        OrdersModule ],
+    //forwardRef(() => UsersModule )],// esto se hace cuando 2 servicios se son circulares, servicio A necesita de B y B necesita de A
+    exports: [ ReportsService ]
 })
 export class ReportsModule {}
