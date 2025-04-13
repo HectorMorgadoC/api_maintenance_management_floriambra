@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsEmail, IsOptional, IsString, IsUUID, MaxLength, MinLength, Matches, IsEnum } from "class-validator";
+import { IsEmail, IsOptional, IsString, IsUUID, MaxLength, MinLength, Matches, IsEnum, IsBoolean } from "class-validator";
 import { AccessLevel } from "../interfaces/access-level.inteface";
 
 export class CreateUserDto {
@@ -35,4 +35,8 @@ export class CreateUserDto {
             message: 'The password must have a Uppercase, lowercase letter and a number'
         })
         password: string;
+
+    @IsBoolean()
+    @IsOptional()
+        is_actived?: true;
 }

@@ -22,6 +22,11 @@ export class Process {
     })
         description: string;
     
+    @Column('bool',{
+        default: true
+    })
+    is_active: boolean;
+
     @OneToMany(
         () => Team,
         (team) => team.process,

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateProcessDto {
     
@@ -11,4 +11,8 @@ export class CreateProcessDto {
     @IsString()
     @MaxLength(200)
 	    description: string;
+
+    @IsBoolean()
+    @IsOptional()
+        is_actived?: true;
 }

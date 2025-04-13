@@ -8,6 +8,7 @@ import { DataSource, DeepPartial, Repository } from "typeorm";
 import { Process } from "./entities/process.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 
+
 @Injectable()
 export class ProcessService {
 
@@ -43,13 +44,14 @@ export class ProcessService {
 
     async findAll() {
         try {
-            const processes = await this.processRepository.find() 
-            
+            const processes = await this.processRepository.find()
+
             return processes.map(process => {
                 return {
                     id: process.id,
                     name: process.name,
-                    description: process.description
+                    description: process.description,
+                    status: process.is_active
                 }
             })
 
@@ -107,20 +109,23 @@ export class ProcessService {
         return processPreload;
     }
 
-    async remove(id: string) {
-        const process = await this.processRepository.findOne({ where: { id } });
-        
-        if (!process) {
-            throw new NotFoundException(`Process with id: ${id} not found`);
-        }
+    // The service to kill a process is incomplete.
+    // Warning: Relationships with other services will be taken into account.
 
-        const query = this.processRepository.createQueryBuilder('process');
-        try {
-            await query.delete().where("id = :id", { id }).execute();
-        } catch (error) {
-            this.handleDbExceptions(error);
-        }
-    }
+    // async remove(id: string) {
+    //     const process = await this.processRepository.findOne({ where: { id } });
+    //     
+    //     if (!process) {
+    //         throw new NotFoundException(`Process with id: ${id} not found`);
+    //     }
+
+    //     const query = this.processRepository.createQueryBuilder('process');
+    //     try {
+    //         await query.delete().where("id = :id", { id }).execute();
+    //     } catch (error) {
+    //         this.handleDbExceptions(error);
+    //     }
+    // }
 
     private handleDbExceptions(error: any) {
         if (error.code === "23505") {

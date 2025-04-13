@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable prettier/prettier */
 import { Order } from "src/orders/entities/order.entity";
@@ -43,6 +44,11 @@ export class Team {
         type: "int",
     })
         kilowatts: number;
+
+    @Column('bool',{
+        default: true
+    })
+    is_active: boolean;
 
     @ManyToOne(
         () => Process, 

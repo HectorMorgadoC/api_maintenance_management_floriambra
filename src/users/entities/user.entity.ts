@@ -40,7 +40,8 @@ export class User {
     @Column('bool',{
         default: true
     })
-    isActive: boolean;
+    is_active: boolean;
+    
     @ManyToOne(() => Process, 
     (process) => process.id,
     { onDelete: "CASCADE" })

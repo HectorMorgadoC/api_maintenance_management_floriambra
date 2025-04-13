@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable no-empty */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
@@ -8,6 +9,7 @@ import { UpdateTeamDto } from "./dto/update-team.dto";
 import { DataSource, DeepPartial, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Team } from "./entities/team.entity";
+import { AccessLevel } from "src/users/interfaces/access-level.inteface";
 
 @Injectable()
 export class TeamService {
@@ -40,27 +42,51 @@ export class TeamService {
         }
     }
 
-    async findAll() {
+    async findAll( userAccessLevel: AccessLevel ) {
         try {
             const teams = await this.teamRepository.find({
                 relations: ["process"]
             })
 
-            return teams.map( team => {
-                if (!team.process) {
+            if( userAccessLevel === AccessLevel.admin ) {
+                return teams.map( team => {
+                    if (!team.process) {
+                        return {
+                            id: team.id,
+                            name: team.name,
+                            status: team.is_active,
+                            process: "unassigned"
+                        }
+                    }
                     return {
                         id: team.id,
                         name: team.name,
-                        process: "unassigned"
+                        status: team.is_active,
+                        process: team.process.name
                     }
-                }
-                return {
-                    id: team.id,
-                    name: team.name,
-                    process: team.process.name
-                }
-            })
-            
+                })
+            }
+
+            if( userAccessLevel === AccessLevel.production_supervisor || AccessLevel.operator ) {
+                return teams.map( team => {
+                    if (!team.process) {
+                        return {
+                            id: team.id,
+                            name: team.name,
+                            process: "unassigned"
+                        }
+                    }
+                    if (team.process.is_active && team.is_active ) {
+                        return {
+                            id: team.id,
+                            name: team.name,
+                            process: team.process.name
+                        }
+                    }
+
+                }). filter( team => team )
+            }
+
         } catch (error) {
             this.handleDbExceptions(error)
         }
@@ -143,20 +169,23 @@ export class TeamService {
         
     }
 
-    async remove(id: string) {
-        const team = await this.teamRepository.findOne({ where: { id } });
-        
-        if (!team) {
-            throw new NotFoundException(`Team with id: ${id} not found`);
-        }
+    // The service to kill a teams is incomplete.
+    // Warning: Relationships with other services will be taken into account.
 
-        const query = this.teamRepository.createQueryBuilder('team');
-        try {
-            await query.delete().where("id = :id", { id }).execute();
-        } catch (error) {
-            this.handleDbExceptions(error);
-        }
-    }
+    // async remove(id: string) {
+    //     const team = await this.teamRepository.findOne({ where: { id } });
+    //     
+    //     if (!team) {
+    //         throw new NotFoundException(`Team with id: ${id} not found`);
+    //     }
+
+    //     const query = this.teamRepository.createQueryBuilder('team');
+    //     try {
+    //         await query.delete().where("id = :id", { id }).execute();
+    //     } catch (error) {
+    //         this.handleDbExceptions(error);
+    //     }
+    // }
 
     private handleDbExceptions(error: any) {
         if (error.code === "23505") {

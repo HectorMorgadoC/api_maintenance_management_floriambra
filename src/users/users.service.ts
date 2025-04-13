@@ -24,6 +24,7 @@ import { TeamService } from "src/team/team.service";
 import { ReportsService } from "src/reports/reports.service";
 import { OrdersService } from "src/orders/orders.service";
 
+
 @Injectable()
 export class UsersService {
     constructor(
@@ -47,7 +48,6 @@ export class UsersService {
     async login(loginDto: LoginDto) {
       const { password, username } = loginDto;
 
-      // const accessLevel: AccessLevel = AccessLevel.admin;
 
       const user = await this.userRepository.findOne({
         where: { username },
@@ -55,7 +55,8 @@ export class UsersService {
           username: true, 
           password: true, 
           id: true, 
-          access_level: true, 
+          access_level: true,
+          is_active: true, 
           process: { name: true } 
         },
         relations:["process"]
@@ -69,9 +70,13 @@ export class UsersService {
         throw new UnauthorizedException('Credentials are not valid (password)');
       }
 
+      if (!user.is_active) {
+        throw new UnauthorizedException('User is no longer enabled');
+      }
+
       const token = this.getJwtToken({ access_level: user.access_level, process: user.process?.name, username: user.username });
 
-      const teams = await this.teamService.findAll()
+      const teams = await this.teamService.findAll(user.access_level as AccessLevel)
       const process = await this.processService.findAll()
 
       
@@ -116,7 +121,8 @@ export class UsersService {
             username: user.username,
             access_level: user.access_level,
             teams: teams?.filter( team => {
-              if ( user.process.name === team.process ) 
+              const teamProcess = team?.process
+              if ( user.process.name === teamProcess ) 
               return {
                 team
               }

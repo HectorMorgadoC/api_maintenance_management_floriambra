@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsNumber, IsOptional, IsPositive, IsString, IsUUID, MaxLength, Min } from "class-validator"
+import { IsBoolean, IsNumber, IsOptional, IsPositive, IsString, IsUUID, MaxLength, Min } from "class-validator"
 
 export class CreateTeamDto {
     
@@ -32,6 +32,10 @@ export class CreateTeamDto {
     @IsPositive()
     @IsOptional()
 	    kilowatts: number;
+
+    @IsBoolean()
+    @IsOptional()
+        is_actived?: true;
 
     @IsUUID()
     @IsOptional()
