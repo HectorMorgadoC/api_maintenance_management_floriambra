@@ -1,16 +1,30 @@
 /* eslint-disable indent */
 /* eslint-disable prettier/prettier */
+import { ApiProperty } from "@nestjs/swagger";
 import { IsString, MaxLength, MinLength, Matches } from "class-validator";
 
 
 export class LoginDto {
 
-
+    @ApiProperty({
+        description: "Username to log in",
+        example: "usuario123",
+        nullable: true,
+        minLength: 5,
+        maxLength: 30
+    })
     @IsString()
     @MaxLength(30)
     @MinLength(5)
     username: string;
     
+    @ApiProperty({
+        description: "User password. Must contain at least one uppercase letter, one lowercase letter, and one number.",
+        example: "Password123",
+        nullable: false,
+        minLength: 6,
+        maxLength: 50
+    })
     @IsString()
     @MinLength(6)
     @MaxLength(50)

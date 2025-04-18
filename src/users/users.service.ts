@@ -103,6 +103,17 @@ export class UsersService {
         };
       }
 
+      if ( user.access_level === AccessLevel.technical_supervisor ) {
+        return {
+          user: {
+            username: user.username,
+            access_level: user.access_level,
+            teams: teams,
+          },
+          token
+        };
+      }
+
 
       if ( user.access_level === AccessLevel.operator ) {
         if ( !user.process ) {
@@ -110,27 +121,26 @@ export class UsersService {
             user: {
               username: user.username,
               access_level: user.access_level,
-              teams: []
+              team: []
             },
             token
           }
           
         } else {
-        return {
-          user: {
-            username: user.username,
-            access_level: user.access_level,
-            teams: teams?.filter( team => {
-              const teamProcess = team?.process
-              if ( user.process.name === teamProcess ) 
-              return {
-                team
-              }
-            })
-          },
-          token
-        
-        }
+          return {
+            user: {
+              username: user.username,
+              access_level: user.access_level,
+              team: teams?.filter( team => {
+                const teamProcess = team?.process
+                if ( user.process.name === teamProcess )
+                return {
+                  team
+                }
+              })
+            },
+            token          
+          }
         }
       }
 

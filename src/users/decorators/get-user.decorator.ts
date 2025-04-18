@@ -2,13 +2,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable prettier/prettier */
 import { createParamDecorator, ExecutionContext, InternalServerErrorException } from "@nestjs/common";
+import { ApiProperty } from "@nestjs/swagger";
 import { User } from "src/users/entities/user.entity";
+
+export class UserDto {
+    @ApiProperty({ description: 'The unique identifier of the user' })
+        id: number;
+
+    @ApiProperty({ description: 'The email of the user' })
+        email: string;
+
+    @ApiProperty({ description: 'The name of the user' })
+        name: string;
+}
 
 export const GetUser = createParamDecorator((data, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
     const user = request.user as User;
 
-    if ( !user ) {
+    if (!user) {
         throw new InternalServerErrorException('User not found (request)');
     }
     return user;

@@ -7,6 +7,32 @@ import { Reflector } from '@nestjs/core';
 import { META_ACCESS_LEVEL } from 'src/users/decorators/access-level-protect.decorator';
 import { User } from 'src/users/entities/user.entity';
 
+/**
+ * @swagger
+ * @guard UserAccessLevelGuard
+ * @description Guard to validate the user's access level based on metadata defined in the route handler.
+ * 
+ * @constructor
+ * @param {Reflector} reflector - A service to retrieve metadata for the route handler.
+ * 
+ * @method canActivate
+ * @description Determines whether the current user has the required access level to activate the route.
+ * 
+ * @param {ExecutionContext} context - The execution context of the request.
+ * @returns {boolean | Promise<boolean> | Observable<boolean>} Returns `true` if the user has the required access level, otherwise throws an exception.
+ * 
+ * @throws {UnauthorizedException} If the user is not found in the request.
+ * @throws {ForbiddenException} If the user's access level does not match the required access level.
+ * 
+ * @example
+ * // Apply the guard to a route
+ * @UseGuards(UserAccessLevelGuard)
+ * @SetMetadata(META_ACCESS_LEVEL, 'admin')
+ * @Get('protected-route')
+ * protectedRoute() {
+ *   return 'This route is protected by access level';
+ * }
+ */
 @Injectable()
 export class UserAccessLevelGuard implements CanActivate {
 
