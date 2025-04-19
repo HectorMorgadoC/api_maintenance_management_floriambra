@@ -5,6 +5,7 @@ import { OrdersController } from "./orders.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
 import { TeamModule } from "src/team/team.module";
+import { ApiTags } from "@nestjs/swagger";
 
 @Module({
     controllers: [OrdersController],
@@ -12,4 +13,5 @@ import { TeamModule } from "src/team/team.module";
     imports: [TypeOrmModule.forFeature([Order]),TeamModule],
     exports: [OrdersService]
 })
+@ApiTags('orders')
 export class OrdersModule {}

@@ -5,6 +5,7 @@ import { ReportsController } from "./reports.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Report } from "./entities/report.entity";
 import { OrdersModule } from "src/orders/orders.module";
+import { ApiTags } from "@nestjs/swagger";
 
 
 
@@ -16,4 +17,6 @@ import { OrdersModule } from "src/orders/orders.module";
     //forwardRef(() => UsersModule )],// esto se hace cuando 2 servicios se son circulares, servicio A necesita de B y B necesita de A
     exports: [ ReportsService ]
 })
+
+@ApiTags('orders')
 export class ReportsModule {}

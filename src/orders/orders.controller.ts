@@ -18,22 +18,28 @@ import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { Auth } from "src/users/decorators/auth.decorator";
 import { AccessLevel } from "src/users/interfaces/access-level.inteface";
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('Orders')
 @Controller("order")
 export class OrdersController {
     constructor(private readonly ordersService: OrdersService) {}
 
+    @ApiOperation({ summary: 'Create a new order' })
+    @ApiResponse({ status: 201, description: 'Order created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.operator,
         AccessLevel.production_supervisor,
         AccessLevel.technical_supervisor)
     @Post()
-        create(@Body() createOrderDto: CreateOrderDto) {
-            return this.ordersService.create(createOrderDto);
-        }
+    create(@Body() createOrderDto: CreateOrderDto) {
+        return this.ordersService.create(createOrderDto);
+    }
 
-
+    @ApiOperation({ summary: 'Get all orders with filters' })
+    @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.operator,
@@ -45,6 +51,9 @@ export class OrdersController {
         return this.ordersService.findWithFilters(_paginationDto);
     }
 
+    @ApiOperation({ summary: 'Update an order' })
+    @ApiResponse({ status: 200, description: 'Order updated successfully' })
+    @ApiResponse({ status: 404, description: 'Order not found' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.production_supervisor,
@@ -57,6 +66,9 @@ export class OrdersController {
         return this.ordersService.update(id, updateOrderDto);
     }
 
+    @ApiOperation({ summary: 'Delete an order' })
+    @ApiResponse({ status: 200, description: 'Order deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Order not found' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.production_supervisor,

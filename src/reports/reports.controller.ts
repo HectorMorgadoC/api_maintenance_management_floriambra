@@ -18,11 +18,16 @@ import { UpdateReportDto } from "./dto/update-report.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { Auth } from "src/users/decorators/auth.decorator";
 import { AccessLevel } from "src/users/interfaces/access-level.inteface";
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
+@ApiTags('Reports')
 @Controller("report")
 export class ReportsController {
     constructor(private readonly reportsService: ReportsService) {}
 
+    @ApiOperation({ summary: 'Create a new report' })
+    @ApiResponse({ status: 201, description: 'Report created successfully.' })
+    @ApiResponse({ status: 400, description: 'Bad request.' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.technical_supervisor,
@@ -32,6 +37,8 @@ export class ReportsController {
         return this.reportsService.create(createReportDto);
     }
     
+    @ApiOperation({ summary: 'Get all reports with filters' })
+    @ApiResponse({ status: 200, description: 'Return all reports.' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.technical_supervisor,
@@ -41,6 +48,10 @@ export class ReportsController {
         return this.reportsService.findWithFilters(_paginationDto);
     }
 
+    @ApiOperation({ summary: 'Update a report' })
+    @ApiParam({ name: 'id', description: 'Report ID' })
+    @ApiResponse({ status: 200, description: 'Report updated successfully.' })
+    @ApiResponse({ status: 404, description: 'Report not found.' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.technical_supervisor)
@@ -49,6 +60,10 @@ export class ReportsController {
         return this.reportsService.update(id, updateReportDto);
     }
 
+    @ApiOperation({ summary: 'Update production approval status' })
+    @ApiParam({ name: 'id', description: 'Report ID' })
+    @ApiParam({ name: 'production_approval', description: 'Production approval status' })
+    @ApiResponse({ status: 200, description: 'Production approval updated successfully.' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.production_supervisor)
@@ -60,6 +75,10 @@ export class ReportsController {
         return this.reportsService.updateProductionAproval(id, production_approval);
     }
 
+    @ApiOperation({ summary: 'Update maintenance approval status' })
+    @ApiParam({ name: 'id', description: 'Report ID' })
+    @ApiParam({ name: 'maintenance_approval', description: 'Maintenance approval status' })
+    @ApiResponse({ status: 200, description: 'Maintenance approval updated successfully.' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.technical_supervisor)
@@ -71,6 +90,10 @@ export class ReportsController {
         return this.reportsService.updateMaintenanceAproval(id,maintenance_approval);
     }
 
+    @ApiOperation({ summary: 'Delete a report' })
+    @ApiParam({ name: 'id', description: 'Report ID' })
+    @ApiResponse({ status: 200, description: 'Report deleted successfully.' })
+    @ApiResponse({ status: 404, description: 'Report not found.' })
     @Auth(
         AccessLevel.admin,
         AccessLevel.technical_supervisor)

@@ -75,15 +75,29 @@ export class User {
     })
     is_active: boolean;
     
+    @ApiProperty({
+        type: () => Process,
+        description: "Process associated with the user"
+    })
     @ManyToOne(() => Process, 
     (process) => process.id,
     { onDelete: "CASCADE" })
     process: Process; 
     
+    @ApiProperty({
+        type: () => [Order],
+        description: "Orders created by the user",
+        isArray: true
+    })
     @OneToMany(() => Order, 
     (order) => order.user)
     order: Order;
 
+    @ApiProperty({
+        type: () => [Report],
+        description: "Reports created by the user",
+        isArray: true
+    })
     @OneToMany(() => Report, 
     (report) => report.user,
     {cascade: true })

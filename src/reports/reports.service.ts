@@ -12,8 +12,10 @@ import { PaginationDto } from "src/common/dto/pagination.dto";
 import { OrdersService } from "src/orders/orders.service";
 import { UsersService } from "src/users/users.service";
 import { User } from "src/users/entities/user.entity";
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Injectable()
+@ApiTags('Reports')
 export class ReportsService {
 
     private readonly logger = new Logger(ReportsService.name)
@@ -26,10 +28,14 @@ export class ReportsService {
 
         private readonly dataSourse: DataSource,
 
-       // private readonly userService: UsersService
+        // private readonly userService: UsersService
 
     ){}
 
+    @ApiOperation({ summary: 'Create a new report' })
+    @ApiResponse({ status: 201, description: 'Report created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async create(_createReportDto: CreateReportDto) {
         const newReport = _createReportDto
 
@@ -67,6 +73,9 @@ export class ReportsService {
         
     }
 
+    @ApiOperation({ summary: 'Find reports with filters' })
+    @ApiResponse({ status: 200, description: 'Reports found successfully' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async findWithFilters(_paginationDto: PaginationDto) {
         const { team, user, date_time } = _paginationDto;
 
@@ -118,6 +127,10 @@ export class ReportsService {
         });
     }
 
+    @ApiOperation({ summary: 'Find one report' })
+    @ApiResponse({ status: 200, description: 'Report found successfully' })
+    @ApiResponse({ status: 404, description: 'Report not found' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async findOnePlain(id: string) {
         try {
             return this.reportRepository.findOne({
@@ -129,7 +142,10 @@ export class ReportsService {
         }
     }
 
-
+    @ApiOperation({ summary: 'Update a report' })
+    @ApiResponse({ status: 200, description: 'Report updated successfully' })
+    @ApiResponse({ status: 404, description: 'Report not found' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async update(id: string, _updateReportDto: UpdateReportDto) {
         const updatedReport = _updateReportDto
 
@@ -189,7 +205,10 @@ export class ReportsService {
         }
     }
 
-
+    @ApiOperation({ summary: 'Update production approval status' })
+    @ApiResponse({ status: 200, description: 'Production approval updated successfully' })
+    @ApiResponse({ status: 304, description: 'Report already approved by production' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async updateProductionAproval(id: string, production_approval: boolean) {
         
         const existingReport = await this.reportRepository.findOne({ where: { id }})
@@ -234,6 +253,10 @@ export class ReportsService {
         }
     }
 
+    @ApiOperation({ summary: 'Update maintenance approval status' })
+    @ApiResponse({ status: 200, description: 'Maintenance approval updated successfully' })
+    @ApiResponse({ status: 304, description: 'Report already approved by maintenance' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async updateMaintenanceAproval(id: string, maintenance_approval: boolean) {
         
         const existingReport = await this.reportRepository.findOne({ where: { id }})
@@ -279,7 +302,11 @@ export class ReportsService {
         }
     }
 
-            
+    
+    @ApiOperation({ summary: 'Remove a report' })
+    @ApiResponse({ status: 200, description: 'Report removed successfully' })
+    @ApiResponse({ status: 404, description: 'Report not found' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async remove(id: string) {
         const report = await this.reportRepository.findOne({ where: { id } });
         
@@ -295,6 +322,10 @@ export class ReportsService {
         }
     }
 
+    @ApiOperation({ summary: 'Remove reports for a user' })
+    @ApiResponse({ status: 200, description: 'Reports removed successfully' })
+    @ApiResponse({ status: 404, description: 'No reports found for user' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async removeForUser(id: string) {
 
         const reports = await this.reportRepository.find({ 
@@ -312,6 +343,10 @@ export class ReportsService {
         }
     }
 
+    @ApiOperation({ summary: 'Remove reports for user order' })
+    @ApiResponse({ status: 200, description: 'Reports removed successfully' })
+    @ApiResponse({ status: 404, description: 'No reports found for user order' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async removeForIdUserOrder(id: string) {
         const reports = await this.reportRepository.find({ 
             where: { 
