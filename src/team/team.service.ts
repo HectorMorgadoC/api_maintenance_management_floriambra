@@ -10,7 +10,9 @@ import { DataSource, DeepPartial, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Team } from "./entities/team.entity";
 import { AccessLevel } from "src/users/interfaces/access-level.inteface";
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags("Teams")
 @Injectable()
 export class TeamService {
 
@@ -22,6 +24,10 @@ export class TeamService {
     private readonly dataSourse: DataSource
     ){}
 
+    @ApiOperation({ summary: 'Create a new team' })
+    @ApiResponse({ status: 201, description: 'The team has been successfully created.' })
+    @ApiResponse({ status: 400, description: 'Bad Request.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async create(_createTeamDto: CreateTeamDto) {
         const newTeam = this.teamRepository.create(_createTeamDto as unknown as DeepPartial<Team>);
 
@@ -42,6 +48,9 @@ export class TeamService {
         }
     }
 
+    @ApiOperation({ summary: 'Retrieve all teams' })
+    @ApiResponse({ status: 200, description: 'List of teams retrieved successfully.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async findAll( userAccessLevel: AccessLevel ) {
         try {
             const teams = await this.teamRepository.find({
@@ -92,6 +101,10 @@ export class TeamService {
         }
     }
 
+    @ApiOperation({ summary: 'Retrieve a team by ID' })
+    @ApiResponse({ status: 200, description: 'Team retrieved successfully.' })
+    @ApiResponse({ status: 404, description: 'Team not found.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async findOnePlain(id: string) {
         try {
             return this.teamRepository.findOne({
@@ -103,10 +116,14 @@ export class TeamService {
         }
     }
 
+    @ApiOperation({ summary: 'Update a team by ID' })
+    @ApiResponse({ status: 200, description: 'Team updated successfully.' })
+    @ApiResponse({ status: 404, description: 'Team not found.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async update(id: string, _updateTeamDto: UpdateTeamDto) {
         const updatedTeam = _updateTeamDto;
 
-        const existingTeam = await this.teamRepository.findOne({ where: { id } })
+        const existingTeam = await this.teamRepository.findOne({ where: { id } });
 
         if (!existingTeam) {
             throw new NotFoundException(`Team with id: ${id} not found`);
@@ -114,8 +131,9 @@ export class TeamService {
 
         const teamPreload = await this.teamRepository.preload({
             id,
-            ...updatedTeam as DeepPartial<Team>
-        })
+            ...updatedTeam as DeepPartial<Team>,
+            is_active: _updateTeamDto.is_actived 
+        });
 
         if (!teamPreload) {
             throw new NotFoundException(`Team with id: ${id} not found`);
@@ -145,6 +163,7 @@ export class TeamService {
                     model: updatedEquipment.model,
                     working_voltage: updatedEquipment.working_voltage,
                     kilowatts: updatedEquipment.kilowatts,
+                    is_actived: updatedEquipment.is_active,
                     process: "unassigned"
                 };
             }
@@ -157,6 +176,7 @@ export class TeamService {
                 model: updatedEquipment.model,
                 working_voltage: updatedEquipment.working_voltage,
                 kilowatts: updatedEquipment.kilowatts,
+                is_actived: updatedEquipment.is_active,
                 process: updatedEquipment.process.name
             };
             

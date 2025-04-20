@@ -1,0 +1,96 @@
+## - `(POST)` http://localhost:5000/api/process/
+
+***Request***
+***Bearer Token***
+**Acesso:** Admin
+***text-content: JSON***
+```json
+{
+    "name":"process1",
+    "description":"process description"
+}   
+```
+### `201-Created`
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+
+***Response***
+```json
+{
+    "id": "ccb7c2fd-6a23-49f3-9d7c-a205c14f1d7e",
+    "name": "process1",
+    "description": "process description"
+}
+```
+
+***Request***
+***Bearer Token***
+**Acesso:** Admin
+***text-content: JSON***
+```json
+{}
+```
+
+### `400-Bad Request`
+
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+
+***Response***
+```json
+{
+    "message": [
+        "name must be shorter than or equal to 50 characters",
+        "name must be a string",
+        "description must be shorter than or equal to 200 characters",
+        "description must be a string"
+    ],
+    "error": "Bad Request",
+    "statusCode": 400
+}
+
+{
+    "message": "Key (xxx)=(process) already exists.",
+    "error": "Bad Request",
+    "statusCode": 400
+}
+```
+
+***Bearer Token***
+**Acesso:** Token invalido
+
+### `401-Unauthorized`
+```
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+```
+
+***Response***
+```json
+{
+    "message": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+***Bearer Token***
+**Acesso:** unauthorized token
+
+### `403-Forbidden`
+```
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+```
+
+***Response***
+```json
+{
+    "message": "User juanPerez need a valid role: admin",
+    "error": "Forbidden",
+    "statusCode": 403
+}
+```

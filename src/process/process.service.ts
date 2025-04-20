@@ -7,8 +7,9 @@ import { UpdateProcessDto } from "./dto/update-process.dto";
 import { DataSource, DeepPartial, Repository } from "typeorm";
 import { Process } from "./entities/process.entity";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
-
+@ApiTags('Processes')
 @Injectable()
 export class ProcessService {
 
@@ -22,7 +23,10 @@ export class ProcessService {
     
     ){}
 
-
+    @ApiOperation({ summary: 'Create a new process' })
+    @ApiResponse({ status: 201 })
+    @ApiResponse({ status: 400, description: 'Bad Request.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async create(_createProcessDto: CreateProcessDto) {
 
         const newProcess = this.processRepository.create( _createProcessDto as DeepPartial<Process>);
@@ -42,6 +46,9 @@ export class ProcessService {
         }       
     }
 
+    @ApiOperation({ summary: 'Retrieve all processes' })
+    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async findAll() {
         try {
             const processes = await this.processRepository.find()
@@ -60,6 +67,10 @@ export class ProcessService {
         }
     }
 
+    @ApiOperation({ summary: 'Retrieve a process by ID' })
+    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 404, description: 'Process not found.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async findOnePlain(id: string) {
         const process = await this.processRepository.findOne({ where: { id } })
 
@@ -73,6 +84,10 @@ export class ProcessService {
         }
     }
 
+    @ApiOperation({ summary: 'Update a process by ID' })
+    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 404, description: 'Process not found.' })
+    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
     async update(id: string, _updateProcessDto: UpdateProcessDto) {
         const updatedProcess = _updateProcessDto;
 

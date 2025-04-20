@@ -1,17 +1,32 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsBoolean, IsOptional, IsString, MaxLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateProcessDto {
     
+    @ApiProperty({
+        description: 'The name of the process',
+        maxLength: 50,
+        example: 'Process Name'
+    })
     @IsString()
     @MaxLength(50)
         name: string;
 
+    @ApiProperty({
+        description: 'A brief description of the process',
+        maxLength: 200,
+        example: 'This is a description of the process.'
+    })
     @IsString()
     @MaxLength(200)
-	    description: string;
+        description: string;
 
+    @ApiPropertyOptional({
+        description: 'Indicates if the process is active',
+        example: true
+    })
     @IsBoolean()
     @IsOptional()
         is_actived?: true;

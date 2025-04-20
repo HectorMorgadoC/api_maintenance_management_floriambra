@@ -23,8 +23,10 @@ import { ProcessService } from "src/process/process.service";
 import { TeamService } from "src/team/team.service";
 import { ReportsService } from "src/reports/reports.service";
 import { OrdersService } from "src/orders/orders.service";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 
+@ApiTags('Users')
 @Injectable()
 export class UsersService {
     constructor(
@@ -45,6 +47,9 @@ export class UsersService {
     ) {}
     
 
+    @ApiOperation({ summary: 'Login a user' })
+    @ApiResponse({ status: 200, description: 'User logged in successfully' })
+    @ApiResponse({ status: 401, description: 'Invalid credentials' })
     async login(loginDto: LoginDto) {
       const { password, username } = loginDto;
 
@@ -153,6 +158,10 @@ export class UsersService {
       }
     }
 
+    @ApiOperation({ summary: 'Create a new user' })
+    @ApiResponse({ status: 201, description: 'User created successfully' })
+    @ApiResponse({ status: 400, description: 'Bad request' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async create(_createUserDto: CreateUserDto) {
         
         try {
@@ -174,6 +183,9 @@ export class UsersService {
         }
     }
 
+    @ApiOperation({ summary: 'Get all users' })
+    @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async findAll() {
         const user = await this.userRepository.find({
             relations: ["process"]
@@ -200,6 +212,10 @@ export class UsersService {
         return userReturn;
     }
 
+    @ApiOperation({ summary: 'Get a user by ID' })
+    @ApiResponse({ status: 200, description: 'User retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async findOnePlain(id: string) {
         const user = await this.userRepository.findOne({ where: { id }, relations: ["process"] });
 
@@ -226,6 +242,10 @@ export class UsersService {
         };
     }
 
+    @ApiOperation({ summary: 'Update a user by ID' })
+    @ApiResponse({ status: 200, description: 'User updated successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async update(id: string, _updateUserDto: UpdateUserDto) {
         const { process, access_level,...rest } = _updateUserDto;
         
@@ -263,6 +283,10 @@ export class UsersService {
         
     }
 
+    @ApiOperation({ summary: 'Delete a user by ID' })
+    @ApiResponse({ status: 200, description: 'User deleted successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
     async remove(idUser: string) {
 
         const { id } = await this.findOnePlain( idUser )

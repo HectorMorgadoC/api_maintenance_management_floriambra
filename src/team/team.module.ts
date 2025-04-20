@@ -6,7 +6,9 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Team } from "./entities/team.entity";
 import { ProcessModule } from "src/process/process.module";
 import { UsersModule } from "src/users/users.module";
+import { ApiTags } from "@nestjs/swagger";
 
+@ApiTags('Teams')
 @Module({
     controllers: [TeamController],
     providers: [TeamService],
