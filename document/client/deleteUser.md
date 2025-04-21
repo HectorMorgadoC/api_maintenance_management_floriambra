@@ -4,7 +4,7 @@
 **Acesso:** Admin
 
 ### `200-Ok`
-```
+
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8

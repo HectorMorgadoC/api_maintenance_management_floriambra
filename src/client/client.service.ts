@@ -7,9 +7,9 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { User } from "./entities/user.entity";
+import { CreateClientDto } from "./dto/create-client.dto";
+import { UpdateClientDto } from "./dto/update-client.dto";
+import { Client } from "./entities/client.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
 import * as bcrypt from 'bcrypt';
@@ -28,10 +28,10 @@ import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @ApiTags('Users')
 @Injectable()
-export class UsersService {
+export class ClientService {
     constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        @InjectRepository(Client)
+        private readonly userRepository: Repository<Client>,
 
         private readonly dataSource: DataSource,
 
@@ -162,10 +162,10 @@ export class UsersService {
     @ApiResponse({ status: 201, description: 'User created successfully' })
     @ApiResponse({ status: 400, description: 'Bad request' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
-    async create(_createUserDto: CreateUserDto) {
+    async create(_createUserDto: CreateClientDto) {
         
         try {
-            const { password, ...rest } = _createUserDto as DeepPartial<User>;
+            const { password, ...rest } = _createUserDto as DeepPartial<Client>;
             const user = this.userRepository.create(
                 {
                 ...rest,
@@ -246,7 +246,7 @@ export class UsersService {
     @ApiResponse({ status: 200, description: 'User updated successfully' })
     @ApiResponse({ status: 404, description: 'User not found' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
-    async update(id: string, _updateUserDto: UpdateUserDto) {
+    async update(id: string, _updateUserDto: UpdateClientDto) {
         const { process, access_level,...rest } = _updateUserDto;
         
         const existingUser = await this.userRepository.findOne({ where: { id }, relations: ["process"] });
@@ -257,10 +257,10 @@ export class UsersService {
 
         const userPreload = await this.userRepository.preload( { 
           id,
-          ...rest as DeepPartial<User>,
+          ...rest as DeepPartial<Client>,
           process: process ? { id: process } : existingUser.process,
           access_level: access_level ? access_level : existingUser.access_level
-        } as DeepPartial<User>);
+        } as DeepPartial<Client>);
 
         if (!userPreload) {
             throw new NotFoundException(`User with id: ${id} not found`);
@@ -302,7 +302,7 @@ export class UsersService {
 
           await this.reportsService.removeForIdUserOrder( id )
   
-          await this.ordersService.removeForUser( id )
+          await this.ordersService.removeForClient( id )
 
           await query.delete().where("id = :id", { id }).execute();
 

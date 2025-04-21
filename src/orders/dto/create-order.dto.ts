@@ -26,7 +26,7 @@ export class CreateOrderDto {
         example: 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22'
     })
     @IsUUID()
-    user: string;
+    client: string;
     
     @ApiProperty({
         description: 'notification date',

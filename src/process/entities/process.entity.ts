@@ -2,7 +2,7 @@
 /* eslint-disable prettier/prettier */
 import { ApiProperty } from "@nestjs/swagger";
 import { Team } from "src/team/entities/team.entity";
-import { User } from "src/users/entities/user.entity";
+import { Client } from "src/client/entities/client.entity";
 import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -57,14 +57,14 @@ export class Process {
 
     @ApiProperty({
         description: "Users associated with the process",
-        type: () => [User],
+        type: () => [Client],
     })
     @OneToMany(
-        () => User,
-        (user) => user.process,
+        () => Client,
+        (client) => client.process,
         { cascade: true, eager: true }
     )
-        user: User;
+        client: Client;
     
     @BeforeInsert()
     checkNaneInsert() { 

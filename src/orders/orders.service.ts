@@ -25,7 +25,7 @@ export class OrdersService {
     ){}
 
     @ApiOperation({ summary: 'Create a new order' })
-    @ApiResponse({ status: 201, description: 'Order created successfully' })
+    @ApiResponse({ status: 201 })
     @ApiResponse({ status: 400, description: 'Bad request' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
     async create(_createOrderDto: CreateOrderDto) {
@@ -35,7 +35,7 @@ export class OrdersService {
             const savedOrder = await this.orderRepository.save(newOrder);      
             const newRegisterOrder = await this.orderRepository.findOne({
                 where: { id: savedOrder.id },
-                relations: ["user", "team","team.process"]
+                relations: ["client", "team","team.process"]
             });
 
             if (!newRegisterOrder) {
@@ -46,7 +46,7 @@ export class OrdersService {
                 return {
                     id: newRegisterOrder.id,
                     date: newRegisterOrder.notice_date,
-                    user: newRegisterOrder.user.username,
+                    client: newRegisterOrder.client.username,
                     process: "unassigned",
                     team: newRegisterOrder.team.name,
                     description: newRegisterOrder.fault_description
@@ -56,7 +56,7 @@ export class OrdersService {
             return {
                 id: newRegisterOrder.id,
                 date: newRegisterOrder.notice_date,
-                user: newRegisterOrder.user.username,
+                client: newRegisterOrder.client.username,
                 process: newRegisterOrder.team.process.name,
                 team: newRegisterOrder.team.name,
                 description: newRegisterOrder.fault_description
@@ -69,15 +69,15 @@ export class OrdersService {
     }
 
     @ApiOperation({ summary: 'Find orders with filters' })
-    @ApiResponse({ status: 200, description: 'Orders found successfully' })
+    @ApiResponse({ status: 200 })
     @ApiResponse({ status: 400, description: 'Bad request' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
     async findWithFilters(_paginationDto: PaginationDto) {
-        const { team, user, date_time, order_state } = _paginationDto;
+        const { team, client: client, date_time, order_state } = _paginationDto;
 
         const queryBuilder = this.orderRepository.createQueryBuilder("order")
             .leftJoinAndSelect("order.team", "team")
-            .leftJoinAndSelect("order.user", "user")
+            .leftJoinAndSelect("order.client", "client")
             .leftJoinAndSelect("team.process", "process");
             
         
@@ -85,8 +85,8 @@ export class OrdersService {
             queryBuilder.andWhere('team.id = :teamId', { teamId: team });
         }
         
-        if (user) {
-            queryBuilder.andWhere('user.id = :userId', { userId: user });
+        if (client) {
+            queryBuilder.andWhere('client.id = :clientId', { clientId: client });
         }
 
 
@@ -121,7 +121,7 @@ export class OrdersService {
                     date: order.notice_date,
                     description: order.fault_description,
                     state: order.order_state,
-                    user: order.user.username,
+                    client: order.client.username,
                     process: "unassigned" 
                 }
             }
@@ -131,7 +131,7 @@ export class OrdersService {
                 date: order.notice_date,
                 description: order.fault_description,
                 state: order.order_state,
-                user: order.user.username,
+                client: order.client.username,
                 process: order.team.process.name 
             }
         }) 
@@ -139,14 +139,14 @@ export class OrdersService {
     }
 
     @ApiOperation({ summary: 'Find one order by id' })
-    @ApiResponse({ status: 200, description: 'Order found successfully' })
+    @ApiResponse({ status: 200 })
     @ApiResponse({ status: 404, description: 'Order not found' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
     async findOnePlain(id: string) {
         try {
             return this.orderRepository.findOne({
                 where: { id }, 
-                relations: ["team","user","team.process"]
+                relations: ["team","client","team.process"]
             })
         } catch (error) {
             this.handleDbExceptions(error)
@@ -154,7 +154,7 @@ export class OrdersService {
     }
 
     @ApiOperation({ summary: 'Update an order' })
-    @ApiResponse({ status: 200, description: 'Order updated successfully' })
+    @ApiResponse({ status: 200 })
     @ApiResponse({ status: 404, description: 'Order not found' })
     @ApiResponse({ status: 400, description: 'Bad request' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
@@ -193,7 +193,7 @@ export class OrdersService {
             if (!updatedEquipment.team.process) {
                 return {
                     id: updatedEquipment.id,
-                    username: updatedEquipment.user.username,
+                    client: updatedEquipment.client.username,
                     description: updatedEquipment.fault_description,
                     team: updatedEquipment.team.name,
                     notice_date: updatedEquipment.notice_date,
@@ -203,7 +203,7 @@ export class OrdersService {
 
             return {
                 id: updatedEquipment.id,
-                username: updatedEquipment.user.username,
+                client: updatedEquipment.client.username,
                 description: updatedEquipment.fault_description,
                 team: updatedEquipment.team.name,
                 notice_date: updatedEquipment.notice_date,
@@ -218,7 +218,7 @@ export class OrdersService {
     }
 
     @ApiOperation({ summary: 'Update order state' })
-    @ApiResponse({ status: 200, description: 'Order state updated successfully' })
+    @ApiResponse({ status: 200 })
     @ApiResponse({ status: 404, description: 'Order not found' })
     @ApiResponse({ status: 304, description: 'Order already closed' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
@@ -283,13 +283,14 @@ export class OrdersService {
         }
     }
 
+    // This service is only used by the client module.
     @ApiOperation({ summary: 'Remove orders for user' })
     @ApiResponse({ status: 200, description: 'Orders removed successfully' })
     @ApiResponse({ status: 404, description: 'No orders found for user' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
-    async removeForUser(id: string) {
+    async removeForClient(id: string) {
         const orders = await this.orderRepository.find({ 
-            where: { user: { id } } 
+            where: { client: { id } } 
         });
 
         if (!orders) {

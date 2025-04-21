@@ -4,7 +4,7 @@ import { IsEmail, IsOptional, IsString, IsUUID, MaxLength, MinLength, Matches, I
 import { AccessLevel } from "../interfaces/access-level.inteface";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class CreateUserDto {
+export class CreateClientDto {
     
     @ApiProperty({
         description: "Username to log in",

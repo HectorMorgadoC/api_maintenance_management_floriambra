@@ -10,8 +10,6 @@ import { Report } from "./entities/report.entity"
 import { InjectRepository } from "@nestjs/typeorm";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { OrdersService } from "src/orders/orders.service";
-import { UsersService } from "src/users/users.service";
-import { User } from "src/users/entities/user.entity";
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Injectable()
@@ -57,8 +55,8 @@ export class ReportsService {
                 id_report: newRegisterReport.id,
                 id_order: newRegisterReport.order.id,
                 description_fault: newRegisterReport.order.fault_description,
-                order_creator: newRegisterReport.order.user.username,
-                technical: newRegisterReport.user.username,
+                order_creator: newRegisterReport.order.client.username,
+                technical: newRegisterReport.client.username,
                 team: newRegisterReport.order.team.name,
                 notice_date: newRegisterReport.order.notice_date,
                 from_date: newRegisterReport.from_date,
@@ -77,21 +75,21 @@ export class ReportsService {
     @ApiResponse({ status: 200, description: 'Reports found successfully' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
     async findWithFilters(_paginationDto: PaginationDto) {
-        const { team, user, date_time } = _paginationDto;
+        const { team, client: client, date_time } = _paginationDto;
 
         const queryBuilder = this.reportRepository.createQueryBuilder("report")
             .leftJoinAndSelect("report.order", "order")
-            .leftJoinAndSelect("report.user", "reportUser") 
+            .leftJoinAndSelect("report.client", "reportClient") 
             .leftJoinAndSelect("order.team", "team")
-            .leftJoinAndSelect("order.user", "orderUser")
+            .leftJoinAndSelect("order.client", "orderClient")
             
         
         if (team) {
             queryBuilder.andWhere('team.id = :teamId', { teamId: team });
         }
         
-        if (user) {
-            queryBuilder.andWhere('reportUser.id = :userId', { userId: user });
+        if (client) {
+            queryBuilder.andWhere('reportClient.id = :ClientId', { ClientId: client });
         }
 
 
@@ -109,8 +107,8 @@ export class ReportsService {
                 id_report: report.id,
                 id_order: report.order.id,
                 description_fault: report.order.fault_description,
-                order_creator: report.order.user.username,
-                technical: report.user.username,
+                order_creator: report.order.client.username,
+                technical: report.client.username,
                 collaborators: report.collaborators,
                 team: report.order.team.name,
                 notice_date: report.order.notice_date,
@@ -135,7 +133,7 @@ export class ReportsService {
         try {
             return this.reportRepository.findOne({
                 where: { id }, 
-                relations: ["order","user","order.team","order.user"]
+                relations: ["order","client","order.team","order.client"]
             })
         } catch (error) {
             this.handleDbExceptions(error)
@@ -182,8 +180,8 @@ export class ReportsService {
                 id_report: updatedEquipment.id,
                 id_order: updatedEquipment.order.id,
                 description_fault: updatedEquipment.order.fault_description,
-                order_creator: updatedEquipment.order.user.username,
-                technical: updatedEquipment.user.username,
+                order_creator: updatedEquipment.order.client.username,
+                technical: updatedEquipment.client.username,
                 collaborators: updatedEquipment.collaborators,
                 team: updatedEquipment.order.team.name,
                 notice_date: updatedEquipment.order.notice_date,
@@ -322,14 +320,14 @@ export class ReportsService {
         }
     }
 
-    @ApiOperation({ summary: 'Remove reports for a user' })
+    @ApiOperation({ summary: 'Remove reports for a client' })
     @ApiResponse({ status: 200, description: 'Reports removed successfully' })
     @ApiResponse({ status: 404, description: 'No reports found for user' })
     @ApiResponse({ status: 500, description: 'Internal server error' })
     async removeForUser(id: string) {
 
         const reports = await this.reportRepository.find({ 
-            where: { user: { id } } 
+            where: { client: { id } } 
         });
 
         if (!reports) {
@@ -350,9 +348,9 @@ export class ReportsService {
     async removeForIdUserOrder(id: string) {
         const reports = await this.reportRepository.find({ 
             where: { 
-                order: { user: { id } }
+                order: { client: { id } }
             },
-            relations: ['order', 'order.user']
+            relations: ['order', 'order.client']
         });
 
         if (!reports) {

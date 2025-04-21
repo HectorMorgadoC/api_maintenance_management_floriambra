@@ -13,10 +13,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagg
 import { TeamService } from "./team.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
-import { GetUser } from "src/users/decorators/get-user.decorator";
-import { User } from "src/users/entities/user.entity";
-import { AccessLevel } from "src/users/interfaces/access-level.inteface";
-import { Auth } from "src/users/decorators/auth.decorator";
+import { GetUser } from "src/client/decorators/get-client.decorator";
+import { Client } from "src/client/entities/client.entity";
+import { AccessLevel } from "src/client/interfaces/access-level.inteface";
+import { Auth } from "src/client/decorators/auth.decorator";
 
 @ApiTags("Teams")
 @ApiBearerAuth()
@@ -45,7 +45,7 @@ export class TeamController {
     @ApiResponse({ status: 200, description: "List of teams retrieved successfully." })
     @ApiResponse({ status: 401, description: "Unautorized." })
     @ApiResponse({ status: 403, description: "Forbidden." })
-    findAll(@GetUser() user: User) {
+    findAll(@GetUser() user: Client) {
         return this.teamService.findAll(user.access_level as AccessLevel);
     }
 

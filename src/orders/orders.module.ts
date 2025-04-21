@@ -7,14 +7,14 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
 import { TeamModule } from "src/team/team.module";
 import { ApiTags } from "@nestjs/swagger";
-import { UsersModule } from "src/users/users.module";
+import { ClientModule } from "src/client/client.module";
 
 @Module({
     controllers: [OrdersController],
     providers: [OrdersService],
     imports: [TypeOrmModule.forFeature([Order]),
     TeamModule,
-    forwardRef(() => UsersModule)],
+    forwardRef(() => ClientModule)],
     exports: [OrdersService]
 })
 @ApiTags('orders')

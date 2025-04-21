@@ -5,7 +5,7 @@ import { ProcessService } from "./process.service";
 import { ProcessController } from "./process.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Process } from "./entities/process.entity";
-import { UsersModule } from "src/users/users.module";
+import { ClientModule } from "src/client/client.module";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Process")
@@ -14,7 +14,7 @@ import { ApiTags } from "@nestjs/swagger";
     providers: [ProcessService],
     imports: [
         TypeOrmModule.forFeature([Process]),
-        forwardRef(() => UsersModule)
+        forwardRef(() => ClientModule)
     ],
     exports: [ProcessService],
 })

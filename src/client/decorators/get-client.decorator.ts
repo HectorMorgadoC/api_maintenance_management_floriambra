@@ -3,7 +3,7 @@
 /* eslint-disable prettier/prettier */
 import { createParamDecorator, ExecutionContext, InternalServerErrorException } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
-import { User } from "src/users/entities/user.entity";
+import { Client } from "src/client/entities/client.entity";
 
 export class UserDto {
     @ApiProperty({ description: 'The unique identifier of the user' })
@@ -18,7 +18,7 @@ export class UserDto {
 
 export const GetUser = createParamDecorator((data, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    const user = request.user as User;
+    const user = request.user as Client;
 
     if (!user) {
         throw new InternalServerErrorException('User not found (request)');

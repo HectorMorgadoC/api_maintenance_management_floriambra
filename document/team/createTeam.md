@@ -8,6 +8,7 @@
 {
     "name": "Team2",
     "description": "Team Description",
+    "process": "07fe87cb-58e7-4854-b4ec-9e9d9c338529",
     "march": "MacrchTeam",
     "model": "34hjy",
     "working_voltage": 380,

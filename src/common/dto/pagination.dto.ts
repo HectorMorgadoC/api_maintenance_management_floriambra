@@ -28,7 +28,7 @@ export class PaginationDto {
     @IsOptional()
     @MinLength(1)
     @IsUUID()
-        user?: string;
+        client?: string;
     
     @ApiProperty({ 
         required: false, 

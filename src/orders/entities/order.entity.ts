@@ -5,7 +5,7 @@
 import { Team } from "src/team/entities/team.entity";
 import { Report } from "src/reports/entities/report.entity";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "src/users/entities/user.entity";
+import { Client } from "src/client/entities/client.entity";
 import { ApiProperty } from "@nestjs/swagger";
 
 
@@ -73,13 +73,13 @@ export class Order {
     team: Team;
 
     @ApiProperty({
-        description: 'User who created the order',
-        type: () => User
+        description: 'Client who created the order',
+        type: () => Client
     })
     @ManyToOne(
-        () => User, 
-        (user) => user.order)
-    user: User;
+        () => Client, 
+        (client) => client.order)
+    client: Client;
 
     @ApiProperty({
         description: 'Report associated with the order',

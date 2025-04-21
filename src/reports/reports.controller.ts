@@ -16,8 +16,8 @@ import { ReportsService } from "./reports.service";
 import { CreateReportDto } from "./dto/create-report.dto";
 import { UpdateReportDto } from "./dto/update-report.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
-import { Auth } from "src/users/decorators/auth.decorator";
-import { AccessLevel } from "src/users/interfaces/access-level.inteface";
+import { Auth } from "src/client/decorators/auth.decorator";
+import { AccessLevel } from "src/client/interfaces/access-level.inteface";
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('Reports')

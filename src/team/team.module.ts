@@ -5,7 +5,7 @@ import { TeamController } from "./team.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Team } from "./entities/team.entity";
 import { ProcessModule } from "src/process/process.module";
-import { UsersModule } from "src/users/users.module";
+import { ClientModule } from "src/client/client.module";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags('Teams')
@@ -15,7 +15,7 @@ import { ApiTags } from "@nestjs/swagger";
     imports: [
         TypeOrmModule.forFeature([Team]), 
         ProcessModule,
-        forwardRef(() => UsersModule )
+        forwardRef(() => ClientModule )
     ],
     exports: [ TeamService ]
 })

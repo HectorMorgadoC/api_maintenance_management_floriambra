@@ -12,19 +12,19 @@ import {
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { Response } from 'express';
-import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
+import { ClientService } from "./client.service";
+import { CreateClientDto } from "./dto/create-client.dto";
+import { UpdateClientDto } from "./dto/update-client.dto";
 import { LoginDto } from "./dto/login-user.dto";
 import { Auth } from "./decorators/auth.decorator";
 import { AccessLevel } from "./interfaces/access-level.inteface";
-import { GetUser } from "./decorators/get-user.decorator";
-import { User } from "./entities/user.entity";
+import { GetUser } from "./decorators/get-client.decorator";
+import { Client } from "./entities/client.entity";
 
-@ApiTags("users") // Agrupa las rutas bajo el tag "users" en Swagger
-@Controller("users")
-export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+@ApiTags("client") // Agrupa las rutas bajo el tag "users" en Swagger
+@Controller("client")
+export class ClientController {
+    constructor(private readonly clientService: ClientService) {}
 
     @Post("/login")
     @ApiOperation({ summary: "User login" })
@@ -34,7 +34,7 @@ export class UsersController {
         @Body() loginDto: LoginDto,
         @Res({ passthrough: true }) response: Response
     ) {
-        const { token, user } = await this.usersService.login(loginDto);
+        const { token, user } = await this.clientService.login(loginDto);
         response.setHeader('Authorization', `Bearer ${token}`);
         return { user };
     }
@@ -42,42 +42,44 @@ export class UsersController {
     @Post()
     @Auth(AccessLevel.admin)
     @ApiBearerAuth() // Indica que esta ruta requiere autenticación
-    @ApiOperation({ summary: "Create a new user" })
+    @ApiOperation({ summary: "Create a new client" })
     @ApiResponse({ status: 201 })
     @ApiResponse({ status: 400, description: "Bad Request." })
     @ApiResponse({ status: 401, description: "Unauthorized" })
-    @ApiResponse({ status: 403, description: "User XXXX need a valid role: admin" })
-    create(@Body() createUserDto: CreateUserDto) {
-        return this.usersService.create(createUserDto);
+    @ApiResponse({ status: 403, description: "Client XXXX need a valid role: admin" })
+    create(@Body() createUserDto: CreateClientDto) {
+        return this.clientService.create(createUserDto);
     }
     
     @Get()
     @Auth(AccessLevel.admin)
     @ApiBearerAuth()
-    @ApiOperation({ summary: "Get all users" })
+    @ApiOperation({ summary: "Get all clients" })
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 401, description: "Unauthorized" })
     @ApiResponse({ status: 403, description: "User XXXX need a valid role: admin" })
-    findAll(@GetUser() user: User) {
-        console.log(user.username);
-        return this.usersService.findAll();
+    findAll(
+        @GetUser() client: Client
+    ) 
+    {
+        return this.clientService.findAll();
     }
 
     @Patch(":id")
     @Auth(AccessLevel.admin)
     @ApiBearerAuth()
-    @ApiOperation({ summary: "Update a user by ID" })
+    @ApiOperation({ summary: "Update a client by ID" })
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 400, description: "Validation failed (uuid is expected)" })
     @ApiResponse({ status: 401, description: "Unauthorized" })
-    @ApiResponse({ status: 403, description: "User XXXX need a valid role: admin" })
-    @ApiResponse({ status: 404, description: "User with id: XXXX not found" })
+    @ApiResponse({ status: 403, description: "Client XXXX need a valid role: admin" })
+    @ApiResponse({ status: 404, description: "Client with id: XXXX not found" })
     update(
-        @GetUser() user: User,
+        @GetUser() client: Client,
         @Param("id", ParseUUIDPipe) id: string,
-        @Body() updateUserDto: UpdateUserDto,
+        @Body() updateUserDto: UpdateClientDto,
     ) {
-        return this.usersService.update(id, updateUserDto);
+        return this.clientService.update(id, updateUserDto);
     }
 
     @Delete(":id")
@@ -91,6 +93,6 @@ export class UsersController {
     @ApiResponse({ status: 403, description: "User XXXX need a valid role: admin" })
     @ApiResponse({ status: 404, description: "User with id: XXXX not found" })
     remove(@Param("id", ParseUUIDPipe) id: string) {
-        return this.usersService.remove(id);
+        return this.clientService.remove(id);
     }
 }

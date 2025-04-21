@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Module } from "@nestjs/common";
-import { UsersModule } from "./users/users.module";
+import { ClientModule } from "./client/client.module";
 import { TeamModule } from "./team/team.module";
 import { ProcessModule } from "./process/process.module";
 import { OrdersModule } from "./orders/orders.module";
@@ -12,7 +12,7 @@ import { Process } from "./process/entities/process.entity";
 import { Team } from "./team/entities/team.entity";
 import { Order } from "./orders/entities/order.entity";
 import { Report } from "./reports/entities/report.entity";
-import { User } from "./users/entities/user.entity";
+import { Client } from "./client/entities/client.entity";
 @Module({
     imports: [
         ConfigModule.forRoot(),
@@ -24,13 +24,13 @@ import { User } from "./users/entities/user.entity";
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             autoLoadEntities: true,
-            entities:[Process,Team,Order,Report,User],
+            entities:[Process,Team,Order,Report,Client],
             synchronize: true,
             extra: { 
                 timezone: 'Z'
             }
         }),
-        UsersModule,
+        ClientModule,
         TeamModule,
         ProcessModule,
         OrdersModule,

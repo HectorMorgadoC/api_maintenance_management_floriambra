@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable prettier/prettier */
 import { Order } from "src/orders/entities/order.entity";
-import { User } from "src/users/entities/user.entity";
+import { Client } from "src/client/entities/client.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 
@@ -101,10 +101,10 @@ export class Report {
     production_approval: boolean;
     
     @ManyToOne(
-        () => User, 
-        (user) => user.report
+        () => Client, 
+        (client) => client.report
         )
-        user: User;
+        client: Client;
 
     @OneToOne(
         () => Order, 

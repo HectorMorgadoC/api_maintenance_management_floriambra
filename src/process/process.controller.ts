@@ -12,8 +12,8 @@ import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { ProcessService } from "./process.service";
 import { CreateProcessDto } from "./dto/create-process.dto";
 import { UpdateProcessDto } from "./dto/update-process.dto";
-import { Auth } from "src/users/decorators/auth.decorator";
-import { AccessLevel } from "src/users/interfaces/access-level.inteface";
+import { Auth } from "src/client/decorators/auth.decorator";
+import { AccessLevel } from "src/client/interfaces/access-level.inteface";
 
 @ApiTags("process")
 @Controller("process")

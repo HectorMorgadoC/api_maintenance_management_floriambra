@@ -8,10 +8,8 @@ import { Report } from "src/reports/entities/report.entity";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
 
-
-
 @Entity()
-export class User {
+export class Client {
     @ApiProperty({
         example: "ce216e7e-edc2-4e18-aead-dd8187987a6a",
         description: "User id",
@@ -90,7 +88,7 @@ export class User {
         isArray: true
     })
     @OneToMany(() => Order, 
-    (order) => order.user)
+    (order) => order.client)
     order: Order;
 
     @ApiProperty({
@@ -99,7 +97,7 @@ export class User {
         isArray: true
     })
     @OneToMany(() => Report, 
-    (report) => report.user,
+    (report) => report.client,
     {cascade: true })
     report: Report;
     

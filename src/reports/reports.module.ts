@@ -7,7 +7,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Report } from "./entities/report.entity";
 import { OrdersModule } from "src/orders/orders.module";
 import { ApiTags } from "@nestjs/swagger";
-import { UsersModule } from "src/users/users.module";
+import { ClientModule } from "src/client/client.module";
 
 
 
@@ -16,7 +16,7 @@ import { UsersModule } from "src/users/users.module";
     providers: [ ReportsService ],
     imports: [ TypeOrmModule.forFeature([Report] ),
     OrdersModule ,
-    forwardRef(() => UsersModule )],// esto se hace cuando 2 servicios se son circulares, servicio A necesita de B y B necesita de A
+    forwardRef(() => ClientModule )],// esto se hace cuando 2 servicios se son circulares, servicio A necesita de B y B necesita de A
     exports: [ ReportsService ]
 })
 

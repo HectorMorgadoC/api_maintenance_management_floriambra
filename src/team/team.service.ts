@@ -9,7 +9,7 @@ import { UpdateTeamDto } from "./dto/update-team.dto";
 import { DataSource, DeepPartial, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Team } from "./entities/team.entity";
-import { AccessLevel } from "src/users/interfaces/access-level.inteface";
+import { AccessLevel } from "src/client/interfaces/access-level.inteface";
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags("Teams")

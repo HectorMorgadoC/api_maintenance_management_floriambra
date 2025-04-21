@@ -4,8 +4,8 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
-import { META_ACCESS_LEVEL } from 'src/users/decorators/access-level-protect.decorator';
-import { User } from 'src/users/entities/user.entity';
+import { META_ACCESS_LEVEL } from 'src/client/decorators/access-level-protect.decorator';
+import { Client } from 'src/client/entities/client.entity';
 
 /**
  * @swagger
@@ -54,15 +54,15 @@ export class UserAccessLevelGuard implements CanActivate {
         }
     
         const request = context.switchToHttp().getRequest();
-        const user = request.user as User;
+        const user = request.user as Client;
         
     
         if ( !user ) {
-            throw new UnauthorizedException('User not found ');
+            throw new UnauthorizedException('Client not found ');
         }
     
         if ( !validAccessLevel.includes( user.access_level ) ) {
-            throw new ForbiddenException(`User ${user.username} need a valid role: ${validAccessLevel}`);
+            throw new ForbiddenException(`Client ${user.username} need a valid role: ${validAccessLevel}`);
         }
 
         return true;

@@ -1,10 +1,10 @@
 /* eslint-disable indent */
 /* eslint-disable prettier/prettier */
 import { forwardRef, Module } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { UsersController } from "./users.controller";
+import { ClientService } from "./client.service";
+import { ClientController } from "./client.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./entities/user.entity";
+import { Client } from "./entities/client.entity";
 import { ProcessModule } from "../process/process.module";
 import { ConfigModule } from "@nestjs/config";
 import { PassportModule } from "@nestjs/passport";
@@ -17,11 +17,11 @@ import { OrdersModule } from "src/orders/orders.module";
 
 
 @Module({
-    controllers: [UsersController],
-    providers: [UsersService, JwtStrategy],
+    controllers: [ClientController],
+    providers: [ClientService, JwtStrategy],
     imports: [
         ConfigModule,
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([Client]),
         forwardRef(() => ReportsModule),
         ProcessModule,
         TeamModule,
@@ -39,6 +39,6 @@ import { OrdersModule } from "src/orders/orders.module";
             }
         }),
     ],
-    exports: [UsersService, TypeOrmModule, JwtStrategy, PassportModule, JwtModule]
+    exports: [ClientService, TypeOrmModule, JwtStrategy, PassportModule, JwtModule]
 })
-export class UsersModule {}
+export class ClientModule {}

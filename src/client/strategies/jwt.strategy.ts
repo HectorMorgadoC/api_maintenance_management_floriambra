@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { User } from "../entities/user.entity";
+import { Client } from "../entities/client.entity";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
 import { ConfigService } from "@nestjs/config";
 import { Repository } from "typeorm";
@@ -11,8 +11,8 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 @Injectable()
 export class JwtStrategy extends PassportStrategy( Strategy ) {
     constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        @InjectRepository(Client)
+        private readonly userRepository: Repository<Client>,
         configService: ConfigService
     ) {
         const jwtSecret = configService.get<string>('JWT_SECRET');
@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
         
         });
     }
-    async validate(payload: JwtPayload): Promise<User> {
+    async validate(payload: JwtPayload): Promise<Client> {
         const { username } = payload;
         
         const user = await this.userRepository.findOne({
@@ -39,7 +39,7 @@ export class JwtStrategy extends PassportStrategy( Strategy ) {
         }
 
         if (!user.is_active) {
-            throw new UnauthorizedException('User is not active');
+            throw new UnauthorizedException('Client is not active');
         }
         return user;
     }
