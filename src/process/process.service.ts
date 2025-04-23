@@ -9,70 +9,62 @@ import { Process } from "./entities/process.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
-@ApiTags('Processes')
+@ApiTags("Processes")
 @Injectable()
 export class ProcessService {
-
-    private readonly logger = new Logger(ProcessService.name)
+    private readonly logger = new Logger(ProcessService.name);
     constructor(
-
         @InjectRepository(Process)
         private readonly processRepository: Repository<Process>,
-
         private readonly dataSource: DataSource
-    
-    ){}
+    ) {}
 
-    @ApiOperation({ summary: 'Create a new process' })
+    @ApiOperation({ summary: "Create a new process" })
     @ApiResponse({ status: 201 })
-    @ApiResponse({ status: 400, description: 'Bad Request.' })
-    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+    @ApiResponse({ status: 400, description: "Bad Request." })
+    @ApiResponse({ status: 500, description: "Internal Server Error." })
     async create(_createProcessDto: CreateProcessDto) {
-
-        const newProcess = this.processRepository.create( _createProcessDto as DeepPartial<Process>);
+        const newProcess = this.processRepository.create(_createProcessDto as DeepPartial<Process>);
 
         try {
-
-            const newRegisterProcess  = await this.processRepository.save(newProcess);
+            const newRegisterProcess = await this.processRepository.save(newProcess);
 
             return {
                 id: newRegisterProcess.id,
                 name: newRegisterProcess.name,
                 description: newRegisterProcess.description
-            }
-            
+            };
         } catch (error) {
-            this.handleDbExceptions( error )
-        }       
+            this.handleDbExceptions(error);
+        }
     }
 
-    @ApiOperation({ summary: 'Retrieve all processes' })
+    @ApiOperation({ summary: "Retrieve all processes" })
     @ApiResponse({ status: 200 })
-    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+    @ApiResponse({ status: 500, description: "Internal Server Error." })
     async findAll() {
         try {
-            const processes = await this.processRepository.find()
+            const processes = await this.processRepository.find();
 
-            return processes.map(process => {
+            return processes.map((process) => {
                 return {
                     id: process.id,
                     name: process.name,
                     description: process.description,
-                    status: process.is_active
-                }
-            })
-
+                    is_actived: process.is_active
+                };
+            });
         } catch (error) {
-            this.handleDbExceptions(error)
+            this.handleDbExceptions(error);
         }
     }
 
-    @ApiOperation({ summary: 'Retrieve a process by ID' })
+    @ApiOperation({ summary: "Retrieve a process by ID" })
     @ApiResponse({ status: 200 })
-    @ApiResponse({ status: 404, description: 'Process not found.' })
-    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+    @ApiResponse({ status: 404, description: "Process not found." })
+    @ApiResponse({ status: 500, description: "Internal Server Error." })
     async findOnePlain(id: string) {
-        const process = await this.processRepository.findOne({ where: { id } })
+        const process = await this.processRepository.findOne({ where: { id } });
 
         if (!process) {
             throw new NotFoundException(`Process with id: ${id} not found`);
@@ -81,17 +73,17 @@ export class ProcessService {
         return {
             name: process.name,
             description: process.description
-        }
+        };
     }
 
-    @ApiOperation({ summary: 'Update a process by ID' })
+    @ApiOperation({ summary: "Update a process by ID" })
     @ApiResponse({ status: 200 })
-    @ApiResponse({ status: 404, description: 'Process not found.' })
-    @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+    @ApiResponse({ status: 404, description: "Process not found." })
+    @ApiResponse({ status: 500, description: "Internal Server Error." })
     async update(id: string, _updateProcessDto: UpdateProcessDto) {
-        const updatedProcess = _updateProcessDto;
+        const { is_actived, ...updatedProcess } = _updateProcessDto;
 
-        const existingProcess = await this.processRepository.findOne({ where: { id } })
+        const existingProcess = await this.processRepository.findOne({ where: { id } });
 
         if (!existingProcess) {
             throw new NotFoundException(`Process with id: ${id} not found`);
@@ -99,8 +91,9 @@ export class ProcessService {
 
         const processPreload = await this.processRepository.preload({
             id,
-            ...updatedProcess as DeepPartial<Process>
-        })
+            ...updatedProcess as DeepPartial<Process>,
+            is_active: is_actived
+        });
 
         if (!processPreload) {
             throw new NotFoundException(`Process with id: ${id} not found`);
@@ -123,24 +116,6 @@ export class ProcessService {
 
         return processPreload;
     }
-
-    // The service to kill a process is incomplete.
-    // Warning: Relationships with other services will be taken into account.
-
-    // async remove(id: string) {
-    //     const process = await this.processRepository.findOne({ where: { id } });
-    //     
-    //     if (!process) {
-    //         throw new NotFoundException(`Process with id: ${id} not found`);
-    //     }
-
-    //     const query = this.processRepository.createQueryBuilder('process');
-    //     try {
-    //         await query.delete().where("id = :id", { id }).execute();
-    //     } catch (error) {
-    //         this.handleDbExceptions(error);
-    //     }
-    // }
 
     private handleDbExceptions(error: any) {
         if (error.code === "23505") {

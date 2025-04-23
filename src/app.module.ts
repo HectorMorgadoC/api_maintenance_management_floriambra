@@ -13,6 +13,7 @@ import { Team } from "./team/entities/team.entity";
 import { Order } from "./orders/entities/order.entity";
 import { Report } from "./reports/entities/report.entity";
 import { Client } from "./client/entities/client.entity";
+
 @Module({
     imports: [
         ConfigModule.forRoot(),

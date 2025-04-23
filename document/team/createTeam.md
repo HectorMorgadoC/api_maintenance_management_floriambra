@@ -65,6 +65,12 @@ charset=utf-8
     "error": "Bad Request",
     "statusCode": 400
 }
+
+{
+    "message": "Key (processId)=(9a5ac9aa-ffe9-4616-9d12-85fa55b8b8d0) is not present in table \"process\".",
+    "error": "Bad Request",
+    "statusCode": 400
+}
 ```
 
 ***Bearer Token***

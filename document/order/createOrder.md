@@ -71,6 +71,17 @@ charset=utf-8
   "statusCode": 400
 }
 
+{
+  "message": "[Client] Client does not belong to the process",
+  "error": "Bad Request",
+  "statusCode": 400
+}
+
+{
+  "message": "[Team]: Team is not active",
+  "error": "Bad Request",
+  "statusCode": 400
+}
 ```
 
 ***Bearer Token***

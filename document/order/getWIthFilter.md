@@ -1,5 +1,6 @@
-## - `(GET)` http://localhost:5000/api/order?user=ddb4893d-f84a-4eaa-a774-7afbe15f7211&order_state=true
+## - `(GET)` http://localhost:5000/api/order?client=ddb4893d-f84a-4eaa-a774-7afbe15f7211&order_state=true
 
+***`NOTA:`las ordenes que se enviaran seran las que tengan `order_state` en `false`, ya que estan son las ordenes que no han sido cerradas por un reporte***
 
 #### query
 - team: uuid

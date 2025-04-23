@@ -8,12 +8,11 @@ import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typ
 import { Client } from "src/client/entities/client.entity";
 import { ApiProperty } from "@nestjs/swagger";
 
-
 @Entity()
 export class Order {
     @ApiProperty({
-        description: 'The unique identifier for the order',
-        example: 'e7c6d8f9-0a1b-2c3d-4e5f-6g7h8i9j0k1l',
+        description: "The unique identifier for the order",
+        example: "e7c6d8f9-0a1b-2c3d-4e5f-6g7h8i9j0k1l",
         uniqueItems: true,
         type: "string"
     })
@@ -21,12 +20,12 @@ export class Order {
     id: string;
 
     @ApiProperty({
-        description: 'Date when the order was noticed',
-        example: '2023-08-15T10:30:00.000Z',
+        description: "Date when the order was noticed",
+        example: "2023-08-15T10:30:00.000Z",
         type: "string"
     })
     @Column({
-        type: 'varchar', 
+        type: "varchar",
         transformer: {
             to: (value: Date | string | null): string | null => {
                 if (!value) return null;
@@ -38,11 +37,11 @@ export class Order {
             }
         }
     })
-    notice_date: string; 
+    notice_date: string;
 
     @ApiProperty({
-        description: 'Description of the fault',
-        example: 'Machine not functioning properly',
+        description: "Description of the fault",
+        example: "Machine not functioning properly",
         type: "string"
     })
     @Column({
@@ -52,7 +51,7 @@ export class Order {
     fault_description: string;
 
     @ApiProperty({
-        description: 'Current state of the order',
+        description: "Current state of the order",
         example: false,
         default: false,
         type: "boolean"
@@ -64,29 +63,32 @@ export class Order {
     order_state: boolean;
 
     @ApiProperty({
-        description: 'Team assigned to the order',
+        description: "Team assigned to the order",
         type: () => Team
     })
     @ManyToOne(
-        () => Team, 
-        (team) => team.order)
+        () => Team,
+        (team) => team.order
+    )
     team: Team;
 
     @ApiProperty({
-        description: 'Client who created the order',
+        description: "Client who created the order",
         type: () => Client
     })
     @ManyToOne(
-        () => Client, 
-        (client) => client.order)
+        () => Client,
+        (client) => client.order
+    )
     client: Client;
 
     @ApiProperty({
-        description: 'Report associated with the order',
+        description: "Report associated with the order",
         type: () => Report
     })
     @OneToOne(
-        () => Report, 
-        (report) => report.order)
+        () => Report,
+        (report) => report.order
+    )
     report: Report;
 }

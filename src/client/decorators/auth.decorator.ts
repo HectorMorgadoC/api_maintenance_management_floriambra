@@ -11,7 +11,7 @@ export function Auth(...roles: AccessLevel[]) {
         UseGuards(AuthGuard(), UserAccessLevelGuard),
         AccessLevelProtected(...roles),
         ApiBearerAuth(),
-        ApiUnauthorizedResponse({ description: 'Unauthorized' }),
-        ApiOperation({ summary: 'Authorization required' }),
+        ApiUnauthorizedResponse({ description: "Unauthorized" }),
+        ApiOperation({ summary: "Authorization required" }),
     );
 }

@@ -49,12 +49,12 @@ export class ProcessController {
     @ApiResponse({ status: 403, description: "Acceso denegado." })
     update(
         @Param("id", ParseUUIDPipe) id: string,
-        @Body() updateProcessDto: UpdateProcessDto,
+        @Body() updateProcessDto: UpdateProcessDto
     ) {
         return this.processService.update(id, updateProcessDto);
     }
 
-    // Este método está comentado, pero puedes agregar Swagger si decides habilitarlo.
+    // This driver is optional and must be verified for service.
     // @Delete(":id")
     // @ApiOperation({ summary: "Eliminar un proceso por ID" })
     // @ApiResponse({ status: 200, description: "Proceso eliminado exitosamente." })

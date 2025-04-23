@@ -11,7 +11,7 @@ import {
     Res,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
-import { Response } from 'express';
+import { Response } from "express";
 import { ClientService } from "./client.service";
 import { CreateClientDto } from "./dto/create-client.dto";
 import { UpdateClientDto } from "./dto/update-client.dto";
@@ -21,7 +21,7 @@ import { AccessLevel } from "./interfaces/access-level.inteface";
 import { GetUser } from "./decorators/get-client.decorator";
 import { Client } from "./entities/client.entity";
 
-@ApiTags("client") // Agrupa las rutas bajo el tag "users" en Swagger
+@ApiTags("client")
 @Controller("client")
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
@@ -34,14 +34,14 @@ export class ClientController {
         @Body() loginDto: LoginDto,
         @Res({ passthrough: true }) response: Response
     ) {
-        const { token, user } = await this.clientService.login(loginDto);
-        response.setHeader('Authorization', `Bearer ${token}`);
-        return { user };
+        const { token, client: client } = await this.clientService.login(loginDto);
+        response.setHeader("Authorization", `Bearer ${token}`);
+        return { client: client };
     }
 
     @Post()
     @Auth(AccessLevel.admin)
-    @ApiBearerAuth() // Indica que esta ruta requiere autenticación
+    @ApiBearerAuth()
     @ApiOperation({ summary: "Create a new client" })
     @ApiResponse({ status: 201 })
     @ApiResponse({ status: 400, description: "Bad Request." })
@@ -50,7 +50,7 @@ export class ClientController {
     create(@Body() createUserDto: CreateClientDto) {
         return this.clientService.create(createUserDto);
     }
-    
+
     @Get()
     @Auth(AccessLevel.admin)
     @ApiBearerAuth()
@@ -58,10 +58,7 @@ export class ClientController {
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 401, description: "Unauthorized" })
     @ApiResponse({ status: 403, description: "User XXXX need a valid role: admin" })
-    findAll(
-        @GetUser() client: Client
-    ) 
-    {
+    findAll(@GetUser() client: Client) {
         return this.clientService.findAll();
     }
 
@@ -86,12 +83,11 @@ export class ClientController {
     @Auth(AccessLevel.admin)
     @ApiBearerAuth()
     @ApiOperation({ summary: "Delete a user by ID" })
-    
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 400, description: "Validation failed (uuid is expected)" })
     @ApiResponse({ status: 401, description: "Unauthorized" })
-    @ApiResponse({ status: 403, description: "User XXXX need a valid role: admin" })
-    @ApiResponse({ status: 404, description: "User with id: XXXX not found" })
+    @ApiResponse({ status: 403, description: "Client XXXX need a valid role: admin" })
+    @ApiResponse({ status: 404, description: "Client with id: XXXX not found" })
     remove(@Param("id", ParseUUIDPipe) id: string) {
         return this.clientService.remove(id);
     }

@@ -26,19 +26,19 @@ import { OrdersModule } from "src/orders/orders.module";
         ProcessModule,
         TeamModule,
         OrdersModule,
-        PassportModule.register({ defaultStrategy: 'jwt' }),
+        PassportModule.register({ defaultStrategy: "jwt" }),
         
         JwtModule.registerAsync({
             imports:[ ConfigModule ],
             inject: [ ConfigService ],
             useFactory: ( configService: ConfigService ) => {
                 return {
-                secret: configService.get('JWT_SECRET'),
-                signOptions: { expiresIn: configService.get('JWT_EXPIRATION') },
+                secret: configService.get("JWT_SECRET"),
+                signOptions: { expiresIn: configService.get("JWT_EXPIRATION") },
                 }
             }
         }),
     ],
-    exports: [ClientService, TypeOrmModule, JwtStrategy, PassportModule, JwtModule]
+    exports: [ ClientService, TypeOrmModule, JwtStrategy, PassportModule, JwtModule]
 })
 export class ClientModule {}

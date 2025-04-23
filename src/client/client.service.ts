@@ -12,258 +12,250 @@ import { UpdateClientDto } from "./dto/update-client.dto";
 import { Client } from "./entities/client.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DeepPartial, Repository } from "typeorm";
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from "bcrypt";
 import { DataSource } from "typeorm";
 import { JwtPayload } from "./interfaces/jwt-payload.interface";
 import { JwtService } from "@nestjs/jwt";
 import { LoginDto } from "./dto/login-user.dto";
 import { AccessLevel } from "./interfaces/access-level.inteface";
-
 import { ProcessService } from "src/process/process.service";
 import { TeamService } from "src/team/team.service";
 import { ReportsService } from "src/reports/reports.service";
 import { OrdersService } from "src/orders/orders.service";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
-
-@ApiTags('Users')
+@ApiTags("Client")
 @Injectable()
 export class ClientService {
     constructor(
         @InjectRepository(Client)
-        private readonly userRepository: Repository<Client>,
-
+        private readonly clientRepository: Repository<Client>,
         private readonly dataSource: DataSource,
-
         private readonly jwtService: JwtService,
-
         private readonly teamService: TeamService,
-
         private readonly processService: ProcessService,
-
         private readonly reportsService: ReportsService,
-
         private readonly ordersService: OrdersService
-    ) {}
-    
+    ) { }
 
-    @ApiOperation({ summary: 'Login a user' })
-    @ApiResponse({ status: 200, description: 'User logged in successfully' })
-    @ApiResponse({ status: 401, description: 'Invalid credentials' })
+    @ApiOperation({ summary: "Login a client" })
+    @ApiResponse({ status: 200, description: "Client logged in successfully" })
+    @ApiResponse({ status: 401, description: "Invalid credentials" })
     async login(loginDto: LoginDto) {
-      const { password, username } = loginDto;
+        const { password, username } = loginDto;
 
-
-      const user = await this.userRepository.findOne({
-        where: { username },
-        select: { 
-          username: true, 
-          password: true, 
-          id: true, 
-          access_level: true,
-          is_active: true, 
-          process: { name: true } 
-        },
-        relations:["process"]
-      });
-
-      if (!user) {
-        throw new UnauthorizedException('Credentials are not valid (username)');
-      }
-
-      if (!bcrypt.compareSync(password, user.password)) {
-        throw new UnauthorizedException('Credentials are not valid (password)');
-      }
-
-      if (!user.is_active) {
-        throw new UnauthorizedException('User is no longer enabled');
-      }
-
-      const token = this.getJwtToken({ access_level: user.access_level, process: user.process?.name, username: user.username });
-
-      const teams = await this.teamService.findAll(user.access_level as AccessLevel)
-      const process = await this.processService.findAll()
-
-      
-      if ( user.access_level === AccessLevel.admin ) {
-        return {
-          user: {
-            username: user.username,
-            access_level: user.access_level,
-            teams: teams,
-            process: process
-          },
-          token
-        };
-      }
-
-      if ( user.access_level === AccessLevel.production_supervisor ) {
-        return {
-          user: {
-            username: user.username,
-            access_level: user.access_level,
-            teams: teams,
-          },
-          token
-        };
-      }
-
-      if ( user.access_level === AccessLevel.technical_supervisor ) {
-        return {
-          user: {
-            username: user.username,
-            access_level: user.access_level,
-            teams: teams,
-          },
-          token
-        };
-      }
-
-
-      if ( user.access_level === AccessLevel.operator ) {
-        if ( !user.process ) {
-          return {
-            user: {
-              username: user.username,
-              access_level: user.access_level,
-              team: []
+        const client = await this.clientRepository.findOne({
+            where: { username },
+            select: {
+                username: true,
+                password: true,
+                id: true,
+                access_level: true,
+                is_active: true,
+                process: { name: true }
             },
-            token
-          }
-          
-        } else {
-          return {
-            user: {
-              username: user.username,
-              access_level: user.access_level,
-              team: teams?.filter( team => {
-                const teamProcess = team?.process
-                if ( user.process.name === teamProcess )
-                return {
-                  team
-                }
-              })
-            },
-            token          
-          }
-        }
-      }
-
-      return {
-        user: {
-          username: user.username,
-          access_level: user.access_level,
-        },
-        token
-      }
-    }
-
-    @ApiOperation({ summary: 'Create a new user' })
-    @ApiResponse({ status: 201, description: 'User created successfully' })
-    @ApiResponse({ status: 400, description: 'Bad request' })
-    @ApiResponse({ status: 500, description: 'Internal server error' })
-    async create(_createUserDto: CreateClientDto) {
-        
-        try {
-            const { password, ...rest } = _createUserDto as DeepPartial<Client>;
-            const user = this.userRepository.create(
-                {
-                ...rest,
-                    password: bcrypt.hashSync( password as string, 10 ),
-                }
-            );
-            
-            await this.userRepository.save(user);
-            return {
-                username: user.username,
-                access_level: user.access_level
-            };
-        } catch (error) {
-            this.handleDBException( error );
-        }
-    }
-
-    @ApiOperation({ summary: 'Get all users' })
-    @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
-    @ApiResponse({ status: 500, description: 'Internal server error' })
-    async findAll() {
-        const user = await this.userRepository.find({
             relations: ["process"]
         });
-        const userReturn = user.map( ( user ) => {
-          if (!user.process) {
+
+        if (!client) {
+            throw new UnauthorizedException("Credentials are not valid (username)");
+        }
+
+        if (!bcrypt.compareSync(password, client.password)) {
+            throw new UnauthorizedException("Credentials are not valid (password)");
+        }
+
+        if (!client.is_active) {
+            throw new UnauthorizedException("Client is no longer enabled");
+        }
+
+        const token = this.getJwtToken({ access_level: client.access_level, process: client.process?.name, username: client.username });
+
+        const teams = await this.teamService.findAll(client.access_level as AccessLevel);
+        const process = await this.processService.findAll();
+
+        if (client.access_level === AccessLevel.admin) {
             return {
-              id: user.id,
-              username: user.username,
-              access_level: user.access_level,
-              email: user.email,
-              process: "unassigned"
+                client: {
+                    id: client.id,
+                    username: client.username,
+                    access_level: client.access_level,
+                    teams: teams,
+                    process: process
+                },
+                token
             };
-          }
-  
-          return {
-            id: user.id,
-            username: user.username,
-            access_level: user.access_level,
-            email: user.email,
-            process: user.process.name
-          };
+        }
+
+        if (client.access_level === AccessLevel.production_supervisor) {
+            return {
+                client: {
+                    id: client.id,
+                    username: client.username,
+                    access_level: client.access_level,
+                    teams: teams,
+                },
+                token
+            };
+        }
+
+        if (client.access_level === AccessLevel.technical_supervisor) {
+            return {
+                client: {
+                    id: client.id,
+                    username: client.username,
+                    access_level: client.access_level,
+                    teams: teams,
+                },
+                token
+            };
+        }   
+
+        if (client.access_level === AccessLevel.operator) {
+            if (!client.process) {
+                return {
+                    client: {
+                        id: client,
+                        username: client.username,
+                        access_level: client.access_level,
+                        team: []
+                    },
+                    token
+                };
+            } else {
+                return {
+                    client: {
+                        id: client.id,
+                        username: client.username,
+                        access_level: client.access_level,
+                        team: teams?.filter(team => {
+                            const teamProcess = team?.process;
+                            if (client.process.name === teamProcess)
+                                return {
+                                    team
+                                };
+                        })
+                    },
+                    token
+                };
+            }
+        }
+
+        return {
+            client: {
+                id: client,
+                username: client.username,
+                access_level: client.access_level,
+            },
+            token
+        };
+    }
+
+    @ApiOperation({ summary: "Create a new client" })
+    @ApiResponse({ status: 201, description: "Client created successfully" })
+    @ApiResponse({ status: 400, description: "Bad request" })
+    @ApiResponse({ status: 500, description: "Internal server error" })
+    async create(_createUserDto: CreateClientDto) {
+        try {
+            const { password, ...rest } = _createUserDto as DeepPartial<Client>;
+            const client = this.clientRepository.create(
+                {
+                    ...rest,
+                    password: bcrypt.hashSync(password as string, 10),
+                }
+            );
+
+            await this.clientRepository.save(client);
+            return {
+                username: client.username,
+                access_level: client.access_level
+            };
+        } catch (error) {
+            this.handleDBException(error);
+        }
+    }
+
+    @ApiOperation({ summary: "Get all client" })
+    @ApiResponse({ status: 200, description: "List of users retrieved successfully" })
+    @ApiResponse({ status: 500, description: "Internal server error" })
+    async findAll() {
+        const client = await this.clientRepository.find({
+            relations: ["process"]
+        });
+        const userReturn = client.map((user) => {
+            if (!user.process) {
+                return {
+                    id: user.id,
+                    username: user.username,
+                    access_level: user.access_level,
+                    email: user.email,
+                    process: "unassigned"
+                };
+            }
+
+            return {
+                id: user.id,
+                username: user.username,
+                access_level: user.access_level,
+                email: user.email,
+                process: user.process.name
+            };
         });
         return userReturn;
     }
 
-    @ApiOperation({ summary: 'Get a user by ID' })
-    @ApiResponse({ status: 200, description: 'User retrieved successfully' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiResponse({ status: 500, description: 'Internal server error' })
+    @ApiOperation({ summary: "Get a client by ID" })
+    @ApiResponse({ status: 200, description: "Client retrieved successfully" })
+    @ApiResponse({ status: 404, description: "Client not found" })
+    @ApiResponse({ status: 500, description: "Internal server error" })
     async findOnePlain(id: string) {
-        const user = await this.userRepository.findOne({ where: { id }, relations: ["process"] });
+        const client = await this.clientRepository.findOne({ where: { id }, relations: ["process"] });
 
-        if (!user) {
-            throw new NotFoundException(`User with id: ${id} not found`);
+        if (!client) {
+            throw new NotFoundException(`Client with id: ${id} not found`);
         }
 
-        if (!user.process) {
-          return {
-            id: user.id,
-            username: user.username,
-            access_level: user.access_level,
-            email: user.email,
-            process: "unassigned"
-          };
+        if (!client.process) {
+            return {
+                id: client.id,
+                username: client.username,
+                access_level: client.access_level,
+                email: client.email,
+                process: "unassigned"
+            };
         }
 
         return {
-          id: user.id,
-          username: user.username,
-          access_level: user.access_level,
-          email: user.email,
-          process: user.process.name
+            id: client.id,
+            username: client.username,
+            access_level: client.access_level,
+            email: client.email,
+            process: client.process.name
         };
     }
 
-    @ApiOperation({ summary: 'Update a user by ID' })
-    @ApiResponse({ status: 200, description: 'User updated successfully' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiResponse({ status: 500, description: 'Internal server error' })
+    @ApiOperation({ summary: "Update a client by ID" })
+    @ApiResponse({ status: 200, description: "Client updated successfully" })
+    @ApiResponse({ status: 404, description: "Client not found" })
+    @ApiResponse({ status: 500, description: "Internal server error" })
     async update(id: string, _updateUserDto: UpdateClientDto) {
-        const { process, access_level,...rest } = _updateUserDto;
-        
-        const existingUser = await this.userRepository.findOne({ where: { id }, relations: ["process"] });
+        const { process, access_level, ...rest } = _updateUserDto;
 
-        if (!existingUser) {
-          throw new NotFoundException(`User with id: ${id} not found`);
+        const existingClient = await this.clientRepository.findOne({ where: { id }, relations: ["process"] });
+
+        if (!existingClient) {
+            throw new NotFoundException(`Client with id: ${id} not found`);
         }
 
-        const userPreload = await this.userRepository.preload( { 
-          id,
-          ...rest as DeepPartial<Client>,
-          process: process ? { id: process } : existingUser.process,
-          access_level: access_level ? access_level : existingUser.access_level
+        const userPreload = await this.clientRepository.preload({
+            id,
+            ...rest as DeepPartial<Client>,
+            process: process ? { id: process } : existingClient.process,
+            access_level: access_level ? access_level : existingClient.access_level
         } as DeepPartial<Client>);
 
         if (!userPreload) {
-            throw new NotFoundException(`User with id: ${id} not found`);
+            throw new NotFoundException(`Client with id: ${id} not found`);
         }
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -278,54 +270,41 @@ export class ClientService {
         } catch (error) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();
-            this.handleDBException( error );
-        } 
-        
+            this.handleDBException(error);
+        }
     }
 
-    @ApiOperation({ summary: 'Delete a user by ID' })
-    @ApiResponse({ status: 200, description: 'User deleted successfully' })
-    @ApiResponse({ status: 404, description: 'User not found' })
-    @ApiResponse({ status: 500, description: 'Internal server error' })
-    async remove(idUser: string) {
+    @ApiOperation({ summary: "Delete a client by ID" })
+    @ApiResponse({ status: 200, description: "Client deleted successfully" })
+    @ApiResponse({ status: 404, description: "Client not found" })
+    @ApiResponse({ status: 500, description: "Internal server error" })
+    async remove(idClient: string) {
+        const { id } = await this.findOnePlain(idClient);
+        const query = this.clientRepository.createQueryBuilder("client");
 
-        const { id } = await this.findOnePlain( idUser )
-        const query = this.userRepository.createQueryBuilder('user');
-
-        if (!id ) {
-          throw new NotFoundException(`User with id: ${id} not found`)
+        if (!id) {
+            throw new NotFoundException(`Client with id: ${id} not found`);
         }
 
         try {
-
-          await this.reportsService.removeForUser( id )
-
-          await this.reportsService.removeForIdUserOrder( id )
-  
-          await this.ordersService.removeForClient( id )
-
-          await query.delete().where("id = :id", { id }).execute();
-
+            await this.reportsService.removeForClient(id);
+            await this.reportsService.removeForIdClientOrder(id);
+            await this.ordersService.removeForClient(id);
+            await query.delete().where("id = :id", { id }).execute();
         } catch (error) {
-          this.handleDBException( error )
+            this.handleDBException(error);
         }
-        
     }
 
-    private getJwtToken( payload: JwtPayload ) {
-      const token = this.jwtService.sign( payload );
-      return token
-    }
-  
-
-    private handleDBException( error: any ): never {
-    
-        if ( error.code === '23505' )
-            throw new BadRequestException( error.detail );
-
-        console.log(error)
-
-        throw new InternalServerErrorException('Please check server logs')
+    private getJwtToken(payload: JwtPayload) {
+        const token = this.jwtService.sign(payload);
+        return token;
     }
 
-}
+    private handleDBException(error: any): never {
+        if (error.code === "23505")
+            throw new BadRequestException(error.detail);
+
+        throw new InternalServerErrorException("Please check server logs");
+    }
+}   

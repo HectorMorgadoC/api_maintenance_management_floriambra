@@ -10,36 +10,40 @@ export class Process {
     @ApiProperty({
         description: "Unique identifier for the process",
         example: "123e4567-e89b-12d3-a456-426614174000",
+        type: "string"
     })
     @PrimaryGeneratedColumn("uuid")
-        id: string;
+    id: string;
 
     @ApiProperty({
         description: "Name of the process",
         example: "maintenance_process",
+        type: "string"
     })
     @Column({
         type: "varchar",
         length: 50,
         unique: true,
     })
-        name: string;
+    name: string;
 
     @ApiProperty({
         description: "Description of the process",
         example: "This process handles maintenance tasks.",
+        type: "string"
     })
     @Column({
         type: "varchar",
         length: 200,
     })
-        description: string;
-    
+    description: string;
+
     @ApiProperty({
         description: "Indicates if the process is active",
         example: true,
+        type: "boolean"
     })
-    @Column('bool',{
+    @Column("bool", {
         default: true
     })
     is_active: boolean;
@@ -53,7 +57,7 @@ export class Process {
         (team) => team.process,
         { cascade: true }
     )
-        team: Team;
+    team: Team;
 
     @ApiProperty({
         description: "Users associated with the process",
@@ -64,18 +68,18 @@ export class Process {
         (client) => client.process,
         { cascade: true, eager: true }
     )
-        client: Client;
-    
+    client: Client;
+
     @BeforeInsert()
-    checkNaneInsert() { 
+    checkNaneInsert() {
         this.name = this.name
-        .toLocaleLowerCase()
-        .replaceAll(" ","_")
+            .toLocaleLowerCase()
+            .replaceAll(" ", "_");
     }
 
     @BeforeInsert()
     checkDescriptionInsert() {
         this.description = this.description
-        .toLocaleLowerCase()
+            .toLocaleLowerCase();
     }
 }

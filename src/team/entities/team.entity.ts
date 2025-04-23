@@ -16,10 +16,13 @@ export class Team {
     @PrimaryGeneratedColumn("uuid")
         id: string;
 
+
     @ApiProperty({
-        example: "Maintenance Team A",
+        example: "Team A",
         description: "Name of the team",
-        uniqueItems: true
+        uniqueItems: true,
+        maxLength: 50,
+        type: "string"
     })
     @Column({
         type: "varchar",
@@ -28,9 +31,12 @@ export class Team {
     })
         name: string;
 
+
     @ApiProperty({
         example: "This team handles maintenance for production line A.",
-        description: "Description of the team"
+        description: "Description of the team",
+        maxLength: 200,
+        type: "string"
     })
     @Column({
         type: "varchar",
@@ -38,9 +44,12 @@ export class Team {
     })
         description: string;
 
+
     @ApiProperty({
         example: "March2023as",
-        description: "March of the team"
+        description: "March of the team",
+        maxLength: 40,
+        type: "string"
     })
     @Column({
         type: "varchar",
@@ -48,9 +57,12 @@ export class Team {
     })
         march: string;
 
+
     @ApiProperty({
         example: "ModelX",
-        description: "Model of the team"
+        description: "Model of the team",
+        maxLength: 40,
+        type: "string"
     })
     @Column({
         type: "varchar",
@@ -58,32 +70,40 @@ export class Team {
     })
         model: string;
 
+
     @ApiProperty({
         example: 220,
-        description: "Working voltage of the team"
+        description: "Working voltage of the team",
+        type: "number"
     })
     @Column({
         type: "int",
     })
         working_voltage: number;
 
+
     @ApiProperty({
         example: 15,
-        description: "Kilowatts used by the team"
+        description: "Kilowatts used by the team",
+        type: "number"
     })
     @Column({
         type: "int",
     })
         kilowatts: number;
 
+
     @ApiProperty({
         example: true,
-        description: "Indicates if the team is active"
+        description: "Indicates if the team is active",
+        default: true,
+        type: "boolean"
     })
     @Column('bool',{
         default: true
     })
     is_active: boolean;
+
 
     @ApiProperty({
         description: "Process associated with the team",
@@ -94,6 +114,7 @@ export class Team {
         (process) => process.id,
         { onDelete: "CASCADE" })
         process: Process;
+
 
     @ApiProperty({
         description: "Orders associated with the team",

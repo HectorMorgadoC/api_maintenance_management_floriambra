@@ -13,7 +13,8 @@ export class Client {
     @ApiProperty({
         example: "ce216e7e-edc2-4e18-aead-dd8187987a6a",
         description: "User id",
-        uniqueItems: true
+        uniqueItems: true,
+        type: "string"
     })
     @PrimaryGeneratedColumn("uuid")
     id: string;
@@ -21,7 +22,8 @@ export class Client {
     @ApiProperty({
         example: "JuanPerez",
         description: "user name",
-        uniqueItems: true
+        uniqueItems: true,
+        type: "string"
     })
     @Column({
         unique: true,
@@ -32,7 +34,8 @@ export class Client {
     @ApiProperty({
         example: "juanperez@gmail.com",
         description: "email user",
-        uniqueItems: true
+        uniqueItems: true,
+        type: "string"
     })
     @Column({
         type: "text",
@@ -44,7 +47,8 @@ export class Client {
         example: "operator",
         description: "access level user",
         uniqueItems: true,
-        default: "operator"
+        default: "operator",
+        type: "string"
     })
     @Column({
         default: "operator",
@@ -55,7 +59,8 @@ export class Client {
     @ApiProperty({
         example: "Elementary2021",
         description: "Password user",
-        uniqueItems: true
+        uniqueItems: true,
+        type: "string"
     })
     @Column({
         type: "text"
@@ -68,27 +73,24 @@ export class Client {
         type: "boolean",
         default: true
     })
-    @Column('bool',{
+    @Column("bool", {
         default: true
     })
     is_active: boolean;
-    
+
     @ApiProperty({
         type: () => Process,
         description: "Process associated with the user"
     })
-    @ManyToOne(() => Process, 
-    (process) => process.id,
-    { onDelete: "CASCADE" })
-    process: Process; 
-    
+    @ManyToOne(() => Process, (process) => process.id, { onDelete: "CASCADE" })
+    process: Process;
+
     @ApiProperty({
         type: () => [Order],
         description: "Orders created by the user",
         isArray: true
     })
-    @OneToMany(() => Order, 
-    (order) => order.client)
+    @OneToMany(() => Order, (order) => order.client)
     order: Order;
 
     @ApiProperty({
@@ -96,9 +98,6 @@ export class Client {
         description: "Reports created by the user",
         isArray: true
     })
-    @OneToMany(() => Report, 
-    (report) => report.client,
-    {cascade: true })
+    @OneToMany(() => Report, (report) => report.client, { cascade: true })
     report: Report;
-    
 }

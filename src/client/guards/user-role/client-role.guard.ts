@@ -62,7 +62,7 @@ export class UserAccessLevelGuard implements CanActivate {
         }
     
         if ( !validAccessLevel.includes( user.access_level ) ) {
-            throw new ForbiddenException(`Client ${user.username} need a valid role: ${validAccessLevel}`);
+            throw new ForbiddenException(`Client ${user.username} need a valid role`);
         }
 
         return true;
