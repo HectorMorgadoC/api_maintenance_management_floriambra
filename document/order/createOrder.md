@@ -1,10 +1,13 @@
-## - `(POST)` http://localhost:5000/api/order
+## `(POST)` http://localhost:5000/api/order
 
-***Request***
 ***Bearer Token***
-**Acesso:** admin,production_supervisor,technical_supervisor
+**Access:** admin,production_supervisor,technical_supervisor
 ***text-content: JSON***
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "team": "23781257-8416-43b3-aad0-fdafa0041232", 
     "client": "79c3a573-3441-451c-9111-dd24e7df0dfe",
@@ -12,39 +15,40 @@
     "fault_description": "Description Order"    
 }  
 ```
-### `201-Created`
+#### `201-Created`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-***Response***
-```json
+response:
 {
     "id": "3eb2280c-bd62-4d84-8ead-c20b4e72b992",
     "date": "2024-09-11T09:12:02.000Z",
-    "client": "JuanMorgado",
+    "client": "Client234",
     "process": "process1",
     "team": "Team1",
-    "description": "Descrition order"
+    "description": "Description order"
 }
 ```
 
-***Request***
+
 ***Bearer Token***
-**Acesso:** Admin
+**Access:** Admin
 ***text-content: JSON***
 ```json
-{}
-```
-
-### `400-Bad Request`
-
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
+request:
+{}
+```
 
-***Response***
+#### `400-Bad Request`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
   "message": [
     "team must be a UUID",
@@ -59,11 +63,15 @@ charset=utf-8
   "statusCode": 400
 }
 
+- client does not exist
+
 {
-  "message": "Key (userId)=(23781257-8416-43b3-aad0-fdafa0041232) is not present in table \"client\".",
+  "message": "Key (clientId)=(23781257-8416-43b3-aad0-fdafa0041232) is not present in table \"client\".",
   "error": "Bad Request",
   "statusCode": 400
 }
+
+- team does not exist
 
 {
   "message": "Key (teamId)=(a8d4ff2b-7981-43ca-bc01-58c0faa95f15) is not present in table \"team\".",
@@ -71,11 +79,15 @@ charset=utf-8
   "statusCode": 400
 }
 
+- client does not belong to the process
+
 {
   "message": "[Client] Client does not belong to the process",
   "error": "Bad Request",
   "statusCode": 400
 }
+
+- team is not active
 
 {
   "message": "[Team]: Team is not active",
@@ -84,50 +96,45 @@ charset=utf-8
 }
 ```
 
-***Bearer Token***
-**Acesso:** Token invalido
 
-### `401-Unauthorized`
-```
+
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response: 
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-***Bearer Token***
-**Acesso:** unauthorized token
 
-### `403-Forbidden`
-```
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
-  "message": "User xxxx need a valid role: admin,operator,production_supervisor,technical_supervisor",
+  "message": "Client xxxx need a valid role: admin,operator,production_supervisor,technical_supervisor",
   "error": "Forbidden",
   "statusCode": 403
 }
 ```
 
-### `500-Internal Server Error`
 
+#### `500-Internal Server Error`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-```json
+response:
 {
   "message": "Unexpected error, check server logs",
   "error": "Internal Server Error",

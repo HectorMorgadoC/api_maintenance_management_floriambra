@@ -1,18 +1,13 @@
-## - `(GET)` http://localhost:5000/api/process/
+## `(GET)` http://localhost:5000/api/process/
 
 ***Bearer Token***
-**Acesso:** Admin
-
-### `200-Ok`
-```
+**Access:** Admin
+#### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
-
+response:
 [
     {
         "id": "13d48e33-7df4-472e-9c2c-71fed3d7207b",
@@ -23,38 +18,49 @@ charset=utf-8
     {}
 ]
 ```
-***Bearer Token***
-**Acesso:** Token invalido
 
-### `401-Unauthorized`
-```
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-```json
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-***Bearer Token***
-**Acesso:** unauthorized token
 
-### `403-Forbidden`
-```
+
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-```json
+response:
 {
-    "message": "User JuanPerez need a valid role: admin,production_supervisor,technical_supervisor,operato",
+    "message": "Client client123 need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
+}
+```
+
+
+
+### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```
 

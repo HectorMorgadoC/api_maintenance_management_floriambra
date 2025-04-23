@@ -1,28 +1,24 @@
-## `(DELETE)` http://localhost:5000/api/order/63107c59-45cb-4b0d-898c-e9e4d97d53d1
+## `(GET)`http://localhost:5000/api/client
 
 ***Bearer Token***
-**Access:** admin,production_supervisor,technical_supervisor
+**Access:** Admin
 #### `200-Ok`
-x-powered-by : Expressauthorization
-content-type: application/json; 
-charset=utf-8
-
-
-***Bearer Token***
-**Access:** id not found
-#### `400 Bad-Request`
 ```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
 response:
-{
-    "error": "Bad Request",
-    "message": "Validation failed (uuid is expected)",
-    "statusCode": 400
-}
+[
+    {
+        "id": "ddb4893d-f84a-4eaa-a774-7afbe15f7211",
+        "username": "client1",
+        "access_level": "admin",
+        "email": "client1@gmail.com",
+        "process": "process1"
+    },
+    {}
+]
 ```
-
 
 
 ***Bearer Token***
@@ -49,31 +45,13 @@ content-type: application/json;
 charset=utf-8
 response:
 {
-    "message": "Client xxxx need a valid role: admin,production_supervisor,technical_supervisor",
+    "message": "Client xxx need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
 }
 ```
 
 
-***Bearer Token***
-**Access:** order not found
-#### `404-Not Found`
-```json
-x-powered-by : Expressauthorization
-content-type: application/json; 
-charset=utf-8
-response:
-{
-    "message": "Order with id: 07fe87cb-58e7-4854-b4ec-9e9d9c338529 not found",
-    "error": "Not Found",
-    "statusCode": 404
-}
-```
-
-
-
-***Bearer Token***
 #### `500-Internal Server Error`
 ```json
 x-powered-by : Expressauthorization

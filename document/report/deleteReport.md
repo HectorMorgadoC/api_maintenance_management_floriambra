@@ -1,26 +1,21 @@
-## - `(DELETE)` http://localhost:5000/api/report/63107c59-45cb-4b0d-898c-e9e4d97d53d1
+## `(DELETE)` http://localhost:5000/api/report/63107c59-45cb-4b0d-898c-e9e4d97d53d1
 
 ***Bearer Token***
-**Acesso:** admin,technical_supervisor,technical
-
-### `200-Ok`
-
+**Access:** admin,technical_supervisor,technical
+#### `200-Ok`
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
 
 
 ***Bearer Token***
-**Acesso:** id not found
-
-### `400 Bad-Request`
-
-x-powered-by : Expressauthorization
-content-type: application/json; 
-charset=utf-8
-
-***Response***
+**Access:** id not found
+#### `400 Bad-Request`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "error": "Bad Request",
     "message": "Validation failed (uuid is expected)",
@@ -29,17 +24,13 @@ charset=utf-8
 ```
 
 ***Bearer Token***
-**Acesso:** Token invalido
-
-### `401-Unauthorized`
-```
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
@@ -47,32 +38,45 @@ charset=utf-8
 ```
 
 ***Bearer Token***
-**Acesso:** unauthorized token
-
-### `403-Forbidden`
-```
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Client xxxx need a valid role: admin,technical_supervisor,technical",
     "error": "Forbidden",
     "statusCode": 403
 }
 ```
+
 ***Bearer Token***
-**Acesso:** user not found
-
-### `404-Not Found`
-
+**Access:** Report not found
+#### `404-Not Found`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
-    "message": "Order with id: 07fe87cb-58e7-4854-b4ec-9e9d9c338529 not found",
+    "message": "Report with id: 07fe87cb-58e7-4854-b4ec-9e9d9c338529 not found",
     "error": "Not Found",
     "statusCode": 404
+}
+```
+
+***Bearer Token***
+### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```

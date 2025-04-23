@@ -2,23 +2,23 @@
 ## - `(PATCH)` http://localhost:5000/api/order/d148ca01-eec7-4948-b1ef-fa9f951c2f51
 
 ***Bearer Token***
-**Acesso:** admin,technical_supervisor,technical"
-
-### `200-Ok`
-
+**Access:** admin,technical_supervisor"
+#### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-***Request***
-```json
+request:
 {
     "client": "f1e518cd-c4ab-4730-8e02-7af35e5a2a22"
 }
 ```
 
-***Response***
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "order": "87d4318c-2f29-4beb-af78-081fba384fbf",
     "client": "b294ed4e-6391-42c9-b88e-9da25d53e595",
@@ -32,23 +32,24 @@ charset=utf-8
     "remarks": "Perform transmission pulley change"
 }
 ```
-***Bearer Token***
-**Acesso:** id not found
 
-### `400 Bad-Request`
-```
+
+
+***Bearer Token***
+**Access:** id not found
+#### `400 Bad-Request`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "error": "Bad Request",
     "message": "Validation failed (uuid is expected)",
     "statusCode": 400
 }
+
+- client does not exists
 
 {
     "message": [
@@ -60,17 +61,13 @@ charset=utf-8
 ```
 
 ***Bearer Token***
-**Acesso:** Token invalido
-
-### `401-Unauthorized`
-```
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
@@ -78,29 +75,28 @@ charset=utf-8
 ```
 
 ***Bearer Token***
-**Acesso:** unauthorized token
-
+**Access:** unauthorized token
 ### `403-Forbidden`
-```
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
-    "message": "User xxxx need a valid role: admin,technical_supervisor,technical",
+    "message": "Client xxxx need a valid role: admin,technical_supervisor",
     "error": "Forbidden",
     "statusCode": 403
 }
 ```
+
 ***Bearer Token***
-**Acesso:** user not found
-
-### `404-Not Found`
-
+**Access:** Report not found
+#### `404-Not Found`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "message": "Report with id: 79c3a573-3441-451c-9111-dd24e7df0dfe not found",
     "error": "Not Found",
@@ -108,3 +104,16 @@ charset=utf-8
 }
 ```
 
+***Bearer Token***
+#### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
+}
+```

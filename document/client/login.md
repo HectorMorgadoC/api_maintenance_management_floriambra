@@ -1,15 +1,18 @@
-## - `(GET)`http://localhost:5000/api/users/login
+## `(POST)`http://localhost:5000/api/client/login
 
-***Request***
 ***text-content: JSON***
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+request:
 {
-    "username": "Juan Morgado",
-    "password": "Elementary2021"
+    "username": "Client209",
+    "password": "Password123"
 }
 ```
 
-Existen 5 niveles de acceso, y 5 respuesta diferentes por usuario
+There are 5 levels of access, and 5 different responses per client.
 
 - admin
 - production_supervisor
@@ -17,26 +20,22 @@ Existen 5 niveles de acceso, y 5 respuesta diferentes por usuario
 - operator
 - technical
 
-### `201-Created`
-```
+#### `201-Created`
+#### `admin`
+```json
 x-powered-by : Expressauthorization
 Bearer: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfbGV2ZWwiOiJhZG1pbiIsInByb2Nlc3MiOiJtYW50ZW5pbWllbnRvIiwidXNlcm5hbWUiOiJIZWN0b3IgTW9yZ2FkbyIsImlhdCI6MTc0NTAwMzIzOCwiZXhwIjoxNzQ1MDEwNDM4fQ.rvzj6JLTDNxQiWdiGM__ie5zVB-NXqsq3KAV6ovXwIY
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-#### `admin`
-
-```json
+response:
 {
-    "user": {
-        "username": "Juanperez",
+    "client": {
+        "username": "client123",
         "access_level": "admin",
         "teams": [
             {
                 "id": "bf92561b-108f-42bd-9191-c2eccee3d37e",
-                "name": "machine1",
+                "name": "team1",
                 "status": false,
                 "process": "process1"
             },
@@ -45,7 +44,7 @@ charset=utf-8
         "process": [
             {
                 "id": "13d48e33-7df4-472e-9c2c-71fed3d7207b",
-                "name": "process1",
+                "name": "team2",
                 "description": "description process",
                 "status": true
             },
@@ -56,11 +55,15 @@ charset=utf-8
 ```
 
 #### `production_supervisor || technical_supervisor`
-
 ```json
+x-powered-by : Expressauthorization
+Bearer: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfbGV2ZWwiOiJhZG1pbiIsInByb2Nlc3MiOiJtYW50ZW5pbWllbnRvIiwidXNlcm5hbWUiOiJIZWN0b3IgTW9yZ2FkbyIsImlhdCI6MTc0NTAwMzIzOCwiZXhwIjoxNzQ1MDEwNDM4fQ.rvzj6JLTDNxQiWdiGM__ie5zVB-NXqsq3KAV6ovXwIY
+content-type: application/json; 
+charset=utf-8
+response:
 {
-    "user": {
-        "username": "Juanperez",
+    "client": {
+        "username": "Client2",
         "access_level": "production_supervisor",
         "teams": [
             {
@@ -75,11 +78,17 @@ charset=utf-8
 ```
 
 #### `operator`
+The client with the `access_level` as `operator` will only have access to the devices that are within the same `process` as the `client`.
 
 ```json
+x-powered-by : Expressauthorization
+Bearer: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfbGV2ZWwiOiJhZG1pbiIsInByb2Nlc3MiOiJtYW50ZW5pbWllbnRvIiwidXNlcm5hbWUiOiJIZWN0b3IgTW9yZ2FkbyIsImlhdCI6MTc0NTAwMzIzOCwiZXhwIjoxNzQ1MDEwNDM4fQ.rvzj6JLTDNxQiWdiGM__ie5zVB-NXqsq3KAV6ovXwIY
+content-type: application/json; 
+charset=utf-8
+response:
 {
-    "user": {
-        "username": "Juanperez",
+    "client": {
+        "username": "Client123",
         "access_level": "operator",
         "team": [
             {
@@ -94,43 +103,28 @@ charset=utf-8
 ```
 
 #### `technical`
-
 ```json
+x-powered-by : Expressauthorization
+Bearer: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfbGV2ZWwiOiJhZG1pbiIsInByb2Nlc3MiOiJtYW50ZW5pbWllbnRvIiwidXNlcm5hbWUiOiJIZWN0b3IgTW9yZ2FkbyIsImlhdCI6MTc0NTAwMzIzOCwiZXhwIjoxNzQ1MDEwNDM4fQ.rvzj6JLTDNxQiWdiGM__ie5zVB-NXqsq3KAV6ovXwIY
+content-type: application/json; 
+charset=utf-8
+response:
 {
-    "user": {
-        "username": "Juanperez",
+    "client": {
+        "username": "JClient123",
         "access_level": "technical"
     }
 }
 ```
 
-### `401-Unauthorized`
-
-```
-x-powered-by: Express
-content-type: application/json; charset=utf-8
-content-length: 90
-```
-
-username not valid
+***Bearer Token***
+**Access:** parameters not found
+#### `400-Bad Request`
 ```json
-{
-    "message": "Credentials are not valid (username)",
-    "error": "Unauthorized",
-    "statusCode": 401
-}
-```
-password not valid
-```json
-{
-    "message": "Credentials are not valid (password)",
-    "error": "Unauthorized",
-    "statusCode": 401
-}
-```
-
-### `400-Bad Request`
-```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "message": [
         "username must be longer than or equal to 5 characters",
@@ -143,5 +137,44 @@ password not valid
     ],
     "error": "Bad Request",
     "statusCode": 400
+}
+```
+
+
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
+x-powered-by: Express
+content-type: application/json; charset=utf-8
+content-length: 90
+response:
+{
+    "message": "Credentials are not valid (username)",
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+- password not valid
+
+```json
+{
+    "message": "Credentials are not valid (password)",
+    "error": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+#### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```

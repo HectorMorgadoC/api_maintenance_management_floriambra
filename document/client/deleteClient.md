@@ -1,7 +1,7 @@
-## `(DELETE)` http://localhost:5000/api/order/63107c59-45cb-4b0d-898c-e9e4d97d53d1
+## `(DELETE)`http://localhost:5000/api/client/144086cd-830e-49d0-8a33-1d62eb4888fd
 
 ***Bearer Token***
-**Access:** admin,production_supervisor,technical_supervisor
+**Access:** Admin
 #### `200-Ok`
 x-powered-by : Expressauthorization
 content-type: application/json; 
@@ -22,7 +22,6 @@ response:
     "statusCode": 400
 }
 ```
-
 
 
 ***Bearer Token***
@@ -49,7 +48,7 @@ content-type: application/json;
 charset=utf-8
 response:
 {
-    "message": "Client xxxx need a valid role: admin,production_supervisor,technical_supervisor",
+    "message": "Client xxx need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
 }
@@ -57,7 +56,7 @@ response:
 
 
 ***Bearer Token***
-**Access:** order not found
+**Access:** client not found
 #### `404-Not Found`
 ```json
 x-powered-by : Expressauthorization
@@ -65,15 +64,13 @@ content-type: application/json;
 charset=utf-8
 response:
 {
-    "message": "Order with id: 07fe87cb-58e7-4854-b4ec-9e9d9c338529 not found",
+    "message": "Client with id: a220e4f3-7a98-4e74-b5c6-3996a4653d14 not found",
     "error": "Not Found",
     "statusCode": 404
 }
 ```
 
 
-
-***Bearer Token***
 #### `500-Internal Server Error`
 ```json
 x-powered-by : Expressauthorization

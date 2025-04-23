@@ -12,7 +12,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class Client {
     @ApiProperty({
         example: "ce216e7e-edc2-4e18-aead-dd8187987a6a",
-        description: "User id",
+        description: "Client id",
         uniqueItems: true,
         type: "string"
     })
@@ -21,7 +21,7 @@ export class Client {
 
     @ApiProperty({
         example: "JuanPerez",
-        description: "user name",
+        description: "name client",
         uniqueItems: true,
         type: "string"
     })
@@ -33,7 +33,7 @@ export class Client {
 
     @ApiProperty({
         example: "juanperez@gmail.com",
-        description: "email user",
+        description: "email client",
         uniqueItems: true,
         type: "string"
     })
@@ -45,7 +45,7 @@ export class Client {
 
     @ApiProperty({
         example: "operator",
-        description: "access level user",
+        description: "access level client",
         uniqueItems: true,
         default: "operator",
         type: "string"
@@ -58,7 +58,7 @@ export class Client {
 
     @ApiProperty({
         example: "Elementary2021",
-        description: "Password user",
+        description: "Password client",
         uniqueItems: true,
         type: "string"
     })
@@ -80,14 +80,14 @@ export class Client {
 
     @ApiProperty({
         type: () => Process,
-        description: "Process associated with the user"
+        description: "Process associated with the client"
     })
     @ManyToOne(() => Process, (process) => process.id, { onDelete: "CASCADE" })
     process: Process;
 
     @ApiProperty({
         type: () => [Order],
-        description: "Orders created by the user",
+        description: "Orders created by the client",
         isArray: true
     })
     @OneToMany(() => Order, (order) => order.client)
@@ -95,7 +95,7 @@ export class Client {
 
     @ApiProperty({
         type: () => [Report],
-        description: "Reports created by the user",
+        description: "Reports created by the client",
         isArray: true
     })
     @OneToMany(() => Report, (report) => report.client, { cascade: true })

@@ -1,46 +1,54 @@
-## - `(POST)`http://localhost:5000/api/users
+## `(POST)`http://localhost:5000/api/client
 
-***Request***
 ***Bearer Token***
-**Acesso:** Admin
+**Access:** Admin
 ***text-content: JSON***
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+request:
 {    
-    "username":"usernumber2",
-    "email":"usernumber2@email.com",
+    "username":"clientnumber2",
+    "email":"clientnumber2@email.com",
     "password": "Elementary2021",
     "access_level": "operator"
 }
 ```
-### `201-Created`
+
+
+#### `201-Created`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-***Response***
-```json
+response:
 {
-    "username": "usernumber2",
+    "username": "clientnumber2",
     "access_level": "operator"
 }
 ```
+By default, if no `access_level` is added, `operator` will be loaded.
 
-***Request***
 ***Bearer Token***
-**Acesso:** Admin
+**Access:** Admin
 ***text-content: JSON***
 ```json
-{}
-```
-
-### `400-Bad Request`
-
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
+request:
+{}
+```
 
-***Response***
+***Bearer Token***
+**Access:** Admin
+#### `400-Bad Request`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "message": [
         "username must be longer than or equal to 5 characters",
@@ -56,39 +64,47 @@ charset=utf-8
 }
 ```
 
-***Bearer Token***
-**Acesso:** Token invalido
 
-### `401-Unauthorized`
-```
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-***Bearer Token***
-**Acesso:** unauthorized token
 
-### `403-Forbidden`
-```
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
-    "message": "User juanPerez need a valid role: admin",
+    "message": "Client xxx need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
+}
+```
+
+
+#### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```

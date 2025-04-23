@@ -1,23 +1,25 @@
-## - `(PATCH)` http://localhost:5000/api/team/8994859f-8714-461a-89bb-7ea15789de26
+## `(PATCH)` http://localhost:5000/api/team/8994859f-8714-461a-89bb-7ea15789de26
 
 ***Bearer Token***
-**Acesso:** Admin
-
-### `200-Ok`
-```
+**Access:** Admin
+#### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-***Request***
-```json
+request
 {
     "process": "c3f7a09d-f324-48d0-89da-9ad2d4937cf8"
 }
 ```
 
-***Response***
+
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
     "id": "8994859f-8714-461a-89bb-7ea15789de26",
     "name": "Team1",
     "description": "Team description",
@@ -26,19 +28,18 @@ charset=utf-8
     "working_voltage": 380,
     "kilowatts": 10,
     "process": "process1"
+}
 ```
-***Bearer Token***
-**Acesso:** id not found
 
-### `400 Bad-Request`
-```
+
+***Bearer Token***
+**Access:** id not found
+#### `400 Bad-Request`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "error": "Bad Request",
     "message": "Validation failed (uuid is expected)",
@@ -47,50 +48,62 @@ charset=utf-8
 ```
 
 ***Bearer Token***
-**Acesso:** Token invalido
-
-### `401-Unauthorized`
-```
+**Access:** Token invalido
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-***Bearer Token***
-**Acesso:** unauthorized token
 
-### `403-Forbidden`
-```
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
-    "message": "User juanPerez need a valid role: admin",
+    "message": "Client client123 need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
 }
 ```
+
+
 ***Bearer Token***
-**Acesso:** user not found
-
-### `404-Not Found`
-
+**Access:** team not found
+#### `404-Not Found`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
-    "message": "User with id: a220e4f3-7a98-4e74-b5c6-3996a4653d14 not found",
+    "message": "Team with id: a220e4f3-7a98-4e74-b5c6-3996a4653d14 not found",
     "error": "Not Found",
     "statusCode": 404
+}
+```
+
+
+***Bearer Token***
+### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```

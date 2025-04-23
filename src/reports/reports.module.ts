@@ -16,7 +16,9 @@ import { ClientModule } from "src/client/client.module";
     providers: [ ReportsService ],
     imports: [ TypeOrmModule.forFeature([Report] ),
     OrdersModule ,
-    forwardRef(() => ClientModule )],// esto se hace cuando 2 servicios se son circulares, servicio A necesita de B y B necesita de A
+    forwardRef(() => ClientModule )],// This is done when 2 services are circular, service A needs B and B needs A
+
+
     exports: [ ReportsService ]
 })
 

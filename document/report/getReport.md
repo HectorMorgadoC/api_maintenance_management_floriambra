@@ -1,4 +1,4 @@
-## - `(GET)` http://localhost:5000/api/report?client=ddb4893d-f84a-4eaa-a774-7afbe15f7211&order_state=true&team=ddb4893d-f84a-4eaa-a774-7afbe15f7211&date_time=2023-01-01T00:00:00Z
+## `(GET)` http://localhost:5000/api/report?client=ddb4893d-f84a-4eaa-a774-7afbe15f7211&order_state=true&team=ddb4893d-f84a-4eaa-a774-7afbe15f7211&date_time=2023-01-01T00:00:00Z
 
 
 #### query
@@ -8,17 +8,13 @@
 - order_state: boolean
 
 ***Bearer Token***
-**Acesso:** admin,technical_supervisor,technical
-
-### `200-Ok`
-```
+**Access:** admin,technical_supervisor,technical
+#### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 [
     {
         "id_report": "1778bd67-76fe-426e-b594-3e595e0851af",
@@ -43,13 +39,18 @@ charset=utf-8
 ]
 ```
 
-### `400-Bad Request`
 
+
+***Bearer Token***
+#### `400-Bad Request`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
+response:
 
-```json
+- Client does not exists
+
 {
     "message": [
         "client must be a UUID"
@@ -58,6 +59,8 @@ charset=utf-8
     "statusCode": 400
 }
 
+- Team does not exists
+
 {
     "message": [
         "team must be a UUID"
@@ -65,6 +68,9 @@ charset=utf-8
     "error": "Bad Request",
     "statusCode": 400
 }
+
+- date_time invalid
+
 {
     "message": [
         "date_time must be a valid ISO 8601 date string"
@@ -74,30 +80,32 @@ charset=utf-8
 }
 ```
 
-***Bearer Token***
-**Acesso:** Token invalido
 
-### `401-Unauthorized`
-```
+
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-### `403-Forbidden`
 
+
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-```json
+response:
 {
     "message": "Client UserOperator need a valid role: admin,technical_supervisor,technical",
     "error": "Forbidden",
@@ -105,6 +113,21 @@ charset=utf-8
 }
 ```
 
+
+
+***Bearer Token***
+#### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
+}
+```
 
 
 

@@ -1,12 +1,31 @@
-## `(DELETE)` http://localhost:5000/api/order/63107c59-45cb-4b0d-898c-e9e4d97d53d1
+## `(PATCH)`http://localhost:5000/api/client/144086cd-830e-49d0-8a33-1d62eb4888fd
 
 ***Bearer Token***
-**Access:** admin,production_supervisor,technical_supervisor
+**Access:** Admin
 #### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
+request:
+{
+    "process": "c3f7a09d-f324-48d0-89da-9ad2d4937cf8"
+}
+```
 
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "id": "0a18ae5d-da46-4f52-9185-e0517b93678b",
+    "username": "Client12",
+    "access_level": "technical",
+    "email": "Client12@gmail.com",
+    "process": "procces1"
+}
+```
 
 ***Bearer Token***
 **Access:** id not found
@@ -23,8 +42,6 @@ response:
 }
 ```
 
-
-
 ***Bearer Token***
 **Access:** Token invalid
 #### `401-Unauthorized`
@@ -39,7 +56,6 @@ response:
 }
 ```
 
-
 ***Bearer Token***
 **Access:** unauthorized token
 #### `403-Forbidden`
@@ -49,15 +65,14 @@ content-type: application/json;
 charset=utf-8
 response:
 {
-    "message": "Client xxxx need a valid role: admin,production_supervisor,technical_supervisor",
+    "message": "Client client234 need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
 }
 ```
 
-
 ***Bearer Token***
-**Access:** order not found
+**Access:** client not found
 #### `404-Not Found`
 ```json
 x-powered-by : Expressauthorization
@@ -65,15 +80,12 @@ content-type: application/json;
 charset=utf-8
 response:
 {
-    "message": "Order with id: 07fe87cb-58e7-4854-b4ec-9e9d9c338529 not found",
+    "message": "Client with id: a220e4f3-7a98-4e74-b5c6-3996a4653d14 not found",
     "error": "Not Found",
     "statusCode": 404
 }
 ```
 
-
-
-***Bearer Token***
 #### `500-Internal Server Error`
 ```json
 x-powered-by : Expressauthorization

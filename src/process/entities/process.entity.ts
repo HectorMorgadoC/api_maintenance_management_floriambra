@@ -60,7 +60,7 @@ export class Process {
     team: Team;
 
     @ApiProperty({
-        description: "Users associated with the process",
+        description: "Client associated with the process",
         type: () => [Client],
     })
     @OneToMany(

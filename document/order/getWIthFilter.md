@@ -1,6 +1,6 @@
-## - `(GET)` http://localhost:5000/api/order?client=ddb4893d-f84a-4eaa-a774-7afbe15f7211&order_state=true
+## `(GET)` http://localhost:5000/api/order?client=ddb4893d-f84a-4eaa-a774-7afbe15f7211&order_state=true
 
-***`NOTA:`las ordenes que se enviaran seran las que tengan `order_state` en `false`, ya que estan son las ordenes que no han sido cerradas por un reporte***
+***NOTE: The orders that will be sent will be those that have `order_state` set to `false`, since these are the orders that have not been closed by a report***
 
 #### query
 - team: uuid
@@ -9,17 +9,13 @@
 - order_state: boolean
 
 ***Bearer Token***
-**Acesso:** Todos( Siempre y cuando esten autenticados )
-
-### `200-Ok`
-```
+**Access:** Everyone (As long as they are authenticated)
+#### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 [
     {
     "id": "f5d606df-f37d-45d0-9ba1-30e850415361",
@@ -32,30 +28,17 @@ charset=utf-8
     {}
 ]
 ```
+
 ***Bearer Token***
-**Acesso:** Token invalido
-
-### `401-Unauthorized`
-```
+#### `400-Bad Request`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
+response:
 
-```json
-{
-    "message": "Unauthorized",
-    "statusCode": 401
-}
-```
+- client is not a uuid
 
-### `400-Bad Request`
-
-x-powered-by : Expressauthorization
-content-type: application/json; 
-charset=utf-8
-
-```json
 {
     "message": [
         "client must be a UUID"
@@ -64,11 +47,43 @@ charset=utf-8
     "statusCode": 400
 }
 
+- team is not a uuid
+
 {
     "message": [
         "team must be a UUID"
     ],
     "error": "Bad Request",
     "statusCode": 400
+}
+```
+
+
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unauthorized",
+    "statusCode": 401
+}
+```
+
+
+***Bearer Token***
+#### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```

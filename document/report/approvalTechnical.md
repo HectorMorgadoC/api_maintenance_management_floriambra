@@ -1,46 +1,40 @@
 
-## - `(PATCH)` http://localhost:5000/api/report/maintenance_approval/b2d60dbe-e8ec-4225-9d0e-225b4b28a240/true
+## `(PATCH)` http://localhost:5000/api/report/maintenance_approval/b2d60dbe-e8ec-4225-9d0e-225b4b28a240/true
 
 ***Bearer Token***
-**Acesso:** admin,technical_supervisor"
-
-### `200-Ok`
-
+**Access:** admin,technical_supervisor"
+#### `200-Ok`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-
-***Response***
-```json
+response:
 {
-  "maintenance_approval": true,
-  "production_approval": false
+    "maintenance_approval": true,
+    "production_approval": false
 }
 ```
 
-Intentar cambiar el valor con el msimo resultado 2 veces
-
-### 304 Not Modified
+***Bearer Token***
+*Trying to change the value with the same result 2 times*
+#### 304 Not Modified
 
 
 ***Bearer Token***
-**Acesso:** id not found
-
-### `400 Bad-Request`
-```
+**Access:** id not found
+#### `400 Bad-Request`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "error": "Bad Request",
     "message": "Validation failed (uuid is expected)",
     "statusCode": 400
 }
+
+- client does not exist
 
 {
     "message": [
@@ -52,46 +46,41 @@ charset=utf-8
 ```
 
 ***Bearer Token***
-**Acesso:** Token invalido
-
-### `401-Unauthorized`
-```
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-***Bearer Token***
-**Acesso:** unauthorized token
 
-### `403-Forbidden`
-```
+
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Client xxxx need a valid role: admin,technical_supervisor",
     "error": "Forbidden",
     "statusCode": 403
 }
 ```
+
+
+
 ***Bearer Token***
-**Acesso:** user not found
-
-### `404-Not Found`
-
+**Access:** Report not found
+#### `404-Not Found`
 ```json
 {
     "message": "Report with id: 79c3a573-3441-451c-9111-dd24e7df0dfe not found",
@@ -100,5 +89,21 @@ charset=utf-8
 }
 ```
 
+
+
+
+***Bearer Token***
+#### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
+}
+```
 
 

@@ -6,7 +6,7 @@ import { IsString, MaxLength, MinLength, Matches } from "class-validator";
 export class LoginDto {
     @ApiProperty({
         description: "Username to log in",
-        example: "usuario123",
+        example: "user123",
         nullable: true,
         minLength: 5,
         maxLength: 30,
@@ -18,7 +18,7 @@ export class LoginDto {
     username: string;
 
     @ApiProperty({
-        description: "User password. Must contain at least one uppercase letter, one lowercase letter, and one number.",
+        description: "Client password. Must contain at least one uppercase letter, one lowercase letter, and one number.",
         example: "Password123",
         nullable: false,
         minLength: 6,

@@ -1,10 +1,13 @@
-## - `(POST)` http://localhost:5000/api/team
+## `(POST)` http://localhost:5000/api/team
 
-***Request***
 ***Bearer Token***
-**Acesso:** Admin
+**Access:** Admin
 ***text-content: JSON***
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+request:
 {
     "name": "Team2",
     "description": "Team Description",
@@ -15,13 +18,13 @@
     "kilowatts": 10
 }
 ```
-### `201-Created`
+
+#### `201-Created`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-
-***Response***
-```json
+response:
 {
     "id": "d26b5d0f-c2ce-4757-8a8c-c139438369a1",
     "name": "Team2",
@@ -33,22 +36,26 @@ charset=utf-8
 }
 ```
 
-***Request***
 ***Bearer Token***
-**Acesso:** Admin
+**Access:** Admin
 ***text-content: JSON***
 ```json
-{}
-```
-
-### `400-Bad Request`
-
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
+request:
+{}
+```
 
-***Response***
+
+
+***Bearer Token***
+#### `400-Bad Request`
 ```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
 {
     "message": [
         "name must be shorter than or equal to 50 characters",
@@ -60,11 +67,15 @@ charset=utf-8
     "statusCode": 400
 }
 
+- team does not exist
+
 {
     "message": "Key (xxx)=(team) already exists.",
     "error": "Bad Request",
     "statusCode": 400
 }
+
+- process does not exits
 
 {
     "message": "Key (processId)=(9a5ac9aa-ffe9-4616-9d12-85fa55b8b8d0) is not present in table \"process\".",
@@ -73,39 +84,52 @@ charset=utf-8
 }
 ```
 
-***Bearer Token***
-**Acesso:** Token invalido
 
-### `401-Unauthorized`
-```
+
+***Bearer Token***
+**Access:** Token invalid
+#### `401-Unauthorized`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
     "message": "Unauthorized",
     "statusCode": 401
 }
 ```
 
-***Bearer Token***
-**Acesso:** unauthorized token
 
-### `403-Forbidden`
-```
+
+***Bearer Token***
+**Access:** unauthorized token
+#### `403-Forbidden`
+```json
 x-powered-by : Expressauthorization
 content-type: application/json; 
 charset=utf-8
-```
-
-***Response***
-```json
+response:
 {
-    "message": "User juanPerez need a valid role: admin",
+    "message": "Client client124 need a valid role: admin",
     "error": "Forbidden",
     "statusCode": 403
+}
+```
+
+
+
+
+***Bearer Token***
+### `500-Internal Server Error`
+```json
+x-powered-by : Expressauthorization
+content-type: application/json; 
+charset=utf-8
+response:
+{
+    "message": "Unexpected error, check server logs",
+    "error": "Internal Server Error",
+    "statusCode": 500
 }
 ```
