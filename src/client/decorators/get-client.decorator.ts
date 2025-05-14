@@ -28,7 +28,7 @@ export class ClientDto {
 
 export const GetUser = createParamDecorator((data, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    const client = request.client as Client;
+    const client = request.user as Client;
 
     if (!client) {
         throw new InternalServerErrorException("Client not found (request)");

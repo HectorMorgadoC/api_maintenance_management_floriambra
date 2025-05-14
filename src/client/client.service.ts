@@ -150,6 +150,20 @@ export class ClientService {
             token
         };
     }
+checkAuthStatus(client: Client) {
+        return {
+            username: client.username,
+            access_level : client.access_level,
+            process: client.process,
+            token: this.getJwtToken( 
+                { 
+                    username: client.username,
+                    access_level: client.access_level,
+                    process: client.process?.name
+                } 
+            )
+        }
+    }
 
     @ApiOperation({ summary: "Create a new client" })
     @ApiResponse({ status: 201, description: "Client created successfully" })

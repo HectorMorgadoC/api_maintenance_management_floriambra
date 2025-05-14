@@ -9,6 +9,7 @@ import {
     Delete,
     ParseUUIDPipe,
     Res,
+    Req,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
 import { Response } from "express";
@@ -38,6 +39,22 @@ export class ClientController {
         response.setHeader("Authorization", `Bearer ${token}`);
         return { client: client };
     }
+
+    @Get("/login/check")
+    @Auth()
+    checkAuth(@GetUser() client: Client){
+        return this.clientService.checkAuthStatus(client)
+    }
+
+    /*
+    @Get("/login/check")
+    @Auth()
+    checkAuth(@Req() request: Request){
+        console.log(request)
+
+        //return this.clientService.checkAuthStatus(client)
+    }
+    */
 
     @Post()
     @Auth(AccessLevel.admin)
