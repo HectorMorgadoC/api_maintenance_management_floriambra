@@ -11,6 +11,7 @@ async function bootstrap() {
     app.enableCors({
         origin: "*",
         methods: "GET,PATCH,POST,DELETE",
+        exposedHeaders: ['Authorization']
     });
 
     const logger = new Logger("bootstrap");
