@@ -253,7 +253,7 @@ checkAuthStatus(client: Client) {
     @ApiResponse({ status: 404, description: "Client not found" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async update(id: string, _updateUserDto: UpdateClientDto) {
-        const { process, access_level, ...rest } = _updateUserDto;
+        const { process, access_level, password,...rest } = _updateUserDto;
 
         const existingClient = await this.clientRepository.findOne({ where: { id }, relations: ["process"] });
 
@@ -264,6 +264,7 @@ checkAuthStatus(client: Client) {
         const userPreload = await this.clientRepository.preload({
             id,
             ...rest as DeepPartial<Client>,
+            password: bcrypt.hashSync(password as string, 10),
             process: process ? { id: process } : existingClient.process,
             access_level: access_level ? access_level : existingClient.access_level
         } as DeepPartial<Client>);
