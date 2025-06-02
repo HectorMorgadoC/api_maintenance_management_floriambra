@@ -264,7 +264,7 @@ checkAuthStatus(client: Client) {
         const userPreload = await this.clientRepository.preload({
             id,
             ...rest as DeepPartial<Client>,
-            password: bcrypt.hashSync(password as string, 10),
+            password: password && password.length > 0 ? bcrypt.hashSync(password, 10) : existingClient.password,
             process: process ? { id: process } : existingClient.process,
             access_level: access_level ? access_level : existingClient.access_level
         } as DeepPartial<Client>);
