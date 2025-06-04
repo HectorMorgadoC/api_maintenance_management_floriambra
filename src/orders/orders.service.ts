@@ -92,6 +92,10 @@ export class OrdersService {
     async findWithFilters(_paginationDto: PaginationDto) {
         const { team, client: client, date_time, order_state } = _paginationDto;
 
+        if (!team && !client && !date_time && !order_state) {
+            return [];
+        }
+
         const queryBuilder = this.orderRepository.createQueryBuilder("order")
             .leftJoinAndSelect("order.team", "team")
             .leftJoinAndSelect("order.client", "client")
@@ -112,6 +116,7 @@ export class OrdersService {
             });
         }
 
+        console.log(queryBuilder)
         const orders = await queryBuilder.getMany();
 
         const listOrders = orders.filter(order => {
