@@ -23,6 +23,8 @@ import { TeamService } from "src/team/team.service";
 import { ReportsService } from "src/reports/reports.service";
 import { OrdersService } from "src/orders/orders.service";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ClientResult } from "./interfaces/client-result";
+import { UUID } from "crypto";
 
 @ApiTags("Client")
 @Injectable()
@@ -73,6 +75,16 @@ export class ClientService {
 
         const teams = await this.teamService.findAll(client.access_level as AccessLevel);
         const process = await this.processService.findAll();
+        const clients = await this.findAll();
+        const clientResponse: ClientResult[] = [];
+
+        clients.forEach(client => {
+            clientResponse.push({
+                id: client.id as UUID,
+                username: client.username
+            })
+
+        });
 
         if (client.access_level === AccessLevel.admin) {
             return {
@@ -81,7 +93,8 @@ export class ClientService {
                     username: client.username,
                     access_level: client.access_level,
                     teams: teams,
-                    process: process
+                    process: process,
+                    clients: clientResponse
                 },
                 token
             };
@@ -94,6 +107,7 @@ export class ClientService {
                     username: client.username,
                     access_level: client.access_level,
                     teams: teams,
+                    clients: clientResponse
                 },
                 token
             };
@@ -106,6 +120,7 @@ export class ClientService {
                     username: client.username,
                     access_level: client.access_level,
                     teams: teams,
+                    clients: clientResponse
                 },
                 token
             };
@@ -118,7 +133,8 @@ export class ClientService {
                         id: client,
                         username: client.username,
                         access_level: client.access_level,
-                        team: []
+                        team: [],
+                        clients: clientResponse
                     },
                     token
                 };
@@ -134,7 +150,8 @@ export class ClientService {
                                 return {
                                     team
                                 };
-                        })
+                        }),
+                        clients: clientResponse
                     },
                     token
                 };
@@ -146,6 +163,7 @@ export class ClientService {
                 id: client,
                 username: client.username,
                 access_level: client.access_level,
+                clients: clientResponse
             },
             token
         };
