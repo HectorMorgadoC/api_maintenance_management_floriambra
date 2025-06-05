@@ -139,7 +139,7 @@ export class OrdersService {
                     description: order.fault_description,
                     state: order.order_state,
                     client: order.client.username,
-                    process: "unassigned"
+                    team: "unassigned"
                 };
             }
 
@@ -149,7 +149,7 @@ export class OrdersService {
                 description: order.fault_description,
                 state: order.order_state,
                 client: order.client.username,
-                process: order.team.process.name
+                team: order.team.name
             };
         });
     }
