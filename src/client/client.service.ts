@@ -145,7 +145,7 @@ export class ClientService {
                         id: client.id,
                         username: client.username,
                         access_level: client.access_level,
-                        team: teams?.filter(team => {
+                        teams: teams?.filter(team => {
                             const teamProcess = team?.process;
                             if (client.process.name === teamProcess)
                                 return {
