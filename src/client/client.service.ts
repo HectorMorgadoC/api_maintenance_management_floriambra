@@ -79,11 +79,12 @@ export class ClientService {
         const clientResponse: ClientResult[] = [];
 
         clients.forEach(client => {
-            clientResponse.push({
+            if(client.access_level != AccessLevel.admin) {
+                clientResponse.push({
                 id: client.id as UUID,
-                username: client.username
-            })
-
+                username: client.username,
+                })
+            }
         });
 
         if (client.access_level === AccessLevel.admin) {
@@ -134,7 +135,7 @@ export class ClientService {
                         username: client.username,
                         access_level: client.access_level,
                         team: [],
-                        clients: clientResponse
+                        clients: []
                     },
                     token
                 };
@@ -151,7 +152,7 @@ export class ClientService {
                                     team
                                 };
                         }),
-                        clients: clientResponse
+                        clients:[]
                     },
                     token
                 };
@@ -163,6 +164,7 @@ export class ClientService {
                 id: client,
                 username: client.username,
                 access_level: client.access_level,
+                teams: teams,
                 clients: clientResponse
             },
             token
