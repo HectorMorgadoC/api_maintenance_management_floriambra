@@ -44,10 +44,10 @@ export class ClientService {
     @ApiResponse({ status: 200, description: "Client logged in successfully" })
     @ApiResponse({ status: 401, description: "Invalid credentials" })
     async login(loginDto: LoginDto) {
-        const { password, username } = loginDto;
+        const { password, email } = loginDto;
 
         const client = await this.clientRepository.findOne({
-            where: { username },
+            where: { email },
             select: {
                 username: true,
                 password: true,
@@ -71,7 +71,7 @@ export class ClientService {
             throw new UnauthorizedException("Client is no longer enabled");
         }
 
-        const token = this.getJwtToken({ access_level: client.access_level, process: client.process?.name, username: client.username });
+        const token = this.getJwtToken({ access_level: client.access_level, process: client.process?.name, email: client.email });
 
         const teams = await this.teamService.findAll(client.access_level as AccessLevel);
         const process = await this.processService.findAll();
@@ -175,7 +175,7 @@ checkAuthStatus(client: Client) {
             process: client.process,
             token: this.getJwtToken( 
                 { 
-                    username: client.username,
+                    email: client.email,
                     access_level: client.access_level,
                     process: client.process?.name
                 } 
