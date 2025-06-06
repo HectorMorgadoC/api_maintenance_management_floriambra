@@ -3,5 +3,6 @@ import { UUID } from "crypto";
 
 export interface ClientResult {
     id: UUID,
-    username: string
+    username: string,
+    process: string
 };

@@ -87,6 +87,7 @@ export class ClientService {
                 clientResponse.push({
                 id: client.id as UUID,
                 username: client.username,
+                process: client.process
                 })
             }
         });
