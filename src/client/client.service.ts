@@ -71,8 +71,12 @@ export class ClientService {
             throw new UnauthorizedException("Client is no longer enabled");
         }
 
-        const token = this.getJwtToken({ access_level: client.access_level, process: client.process?.name, email: client.email });
-
+        const payload: JwtPayload = {
+            sub: client.id as UUID,
+            access_level: client.access_level,
+            process: client.process?.name,
+        }
+        const token = this.getJwtToken(payload);
         const teams = await this.teamService.findAll(client.access_level as AccessLevel);
         const process = await this.processService.findAll();
         const clients = await this.findAll();
@@ -170,14 +174,14 @@ export class ClientService {
             token
         };
     }
-checkAuthStatus(client: Client) {
+    checkAuthStatus(client: Client) {
         return {
             username: client.username,
             access_level : client.access_level,
             process: client.process,
             token: this.getJwtToken( 
                 { 
-                    email: client.email,
+                    sub: client.id as UUID,
                     access_level: client.access_level,
                     process: client.process?.name
                 } 
