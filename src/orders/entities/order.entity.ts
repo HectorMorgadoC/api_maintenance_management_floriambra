@@ -7,6 +7,7 @@ import { Report } from "src/reports/entities/report.entity";
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Client } from "src/client/entities/client.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { StatusOrder } from "../interface/status-order";
 
 @Entity()
 export class Order {
@@ -52,15 +53,23 @@ export class Order {
 
     @ApiProperty({
         description: "Current state of the order",
-        example: false,
-        default: false,
-        type: "boolean"
+        enum: StatusOrder,
+        example: "done",
+        default: StatusOrder.not_tarted,
+        type: "string"
     })
     @Column({
-        type: "boolean",
-        default: false,
+        type: "enum",
+        enum: StatusOrder,
+        default: StatusOrder.not_tarted
     })
-    order_state: boolean;
+    order_state: StatusOrder;
+
+    @Column({
+        type: "varchar",
+        default: ""
+    })
+    observation?:string
 
     @ApiProperty({
         description: "Team assigned to the order",

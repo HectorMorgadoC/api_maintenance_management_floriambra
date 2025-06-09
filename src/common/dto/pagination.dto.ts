@@ -3,8 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable prettier/prettier */
 import { Transform } from "class-transformer";
-import { IsBoolean, IsISO8601, IsOptional, IsString, IsUUID, MinLength } from "class-validator";
+import { IsBoolean, IsEnum, IsISO8601, IsOptional, IsString, IsUUID, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { StatusOrder } from "src/orders/interface/status-order";
 
 export class PaginationDto {
     @ApiProperty({
@@ -43,12 +44,11 @@ export class PaginationDto {
 
     @ApiProperty({
         required: false,
-        description: "Order state boolean flag",
-        example: true,
-        type: "boolean"
+        description: "Order status tracking",
+        example: "done",
+        type: "string"
     })
     @IsOptional()
-    @IsBoolean()
-    @Transform(({ value }) => value === "true")
-    order_state?: boolean;
+    @IsEnum(StatusOrder)
+    order_state?: StatusOrder;
 }

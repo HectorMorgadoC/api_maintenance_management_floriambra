@@ -13,6 +13,7 @@ import { OrdersService } from "src/orders/orders.service";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { ClientService } from "src/client/client.service";
 import { AccessLevel } from "src/client/interfaces/access-level.inteface";
+import { StatusOrder } from "src/orders/interface/status-order";
 
 @Injectable()
 @ApiTags("Reports")
@@ -54,7 +55,7 @@ export class ReportsService {
                 throw new InternalServerErrorException("Error retrieving created order");
             }
 
-            await this.orderService.updateStateOrder(true, newRegisterReport.order.id);
+            await this.orderService.updateStateOrder(StatusOrder.done, newRegisterReport.order.id);
 
             return {
                 id_report: newRegisterReport.id,

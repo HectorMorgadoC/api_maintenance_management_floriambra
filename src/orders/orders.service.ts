@@ -12,6 +12,7 @@ import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ClientService } from "src/client/client.service";
 import { TeamService } from "src/team/team.service";
 import { AccessLevel } from "src/client/interfaces/access-level.inteface";
+import { StatusOrder } from "./interface/status-order";
 
 @ApiTags("Orders")
 @Injectable()
@@ -66,7 +67,9 @@ export class OrdersService {
                     client: newRegisterOrder.client.username,
                     process: "unassigned",
                     team: newRegisterOrder.team.name,
-                    description: newRegisterOrder.fault_description
+                    description: newRegisterOrder.fault_description,
+                    order_state: newRegisterOrder.order_state,
+                    observation: newRegisterOrder.observation
                 };
             }
 
@@ -76,7 +79,9 @@ export class OrdersService {
                 client: newRegisterOrder.client.username,
                 process: newRegisterOrder.team.process.name,
                 team: newRegisterOrder.team.name,
-                description: newRegisterOrder.fault_description
+                description: newRegisterOrder.fault_description,
+                order_state: newRegisterOrder.order_state,
+                observation: newRegisterOrder.observation
             };
         } catch (error) {
             this.handleDbExceptions(error);
@@ -99,7 +104,8 @@ export class OrdersService {
         const queryBuilder = this.orderRepository.createQueryBuilder("order")
             .leftJoinAndSelect("order.team", "team")
             .leftJoinAndSelect("order.client", "client")
-            .leftJoinAndSelect("team.process", "process");
+            .leftJoinAndSelect("team.process", "process")
+            .where("order.order_state = :order_state",{ order_state });
 
         if (team) {
             queryBuilder.andWhere("team.id = :teamId", { teamId: team });
@@ -116,22 +122,9 @@ export class OrdersService {
             });
         }
 
-        console.log(queryBuilder)
         const orders = await queryBuilder.getMany();
 
-        const listOrders = orders.filter(order => {
-            if (order.order_state && order_state) {
-                return {
-                    order
-                };
-            } else if (!order.order_state && !order_state) {
-                return {
-                    order
-                };
-            }
-        });
-
-        return listOrders.map(order => {
+        return orders.map(order => {
             if (!order.team.process) {
                 return {
                     id: order.id,
@@ -139,7 +132,8 @@ export class OrdersService {
                     description: order.fault_description,
                     state: order.order_state,
                     client: order.client.username,
-                    team: "unassigned"
+                    team: "unassigned",
+                    observation: order.observation
                 };
             }
 
@@ -149,7 +143,8 @@ export class OrdersService {
                 description: order.fault_description,
                 state: order.order_state,
                 client: order.client.username,
-                team: order.team.name
+                team: order.team.name,
+                observation: order.observation
             };
         });
     }
@@ -213,7 +208,9 @@ export class OrdersService {
                     description: updatedEquipment.fault_description,
                     team: updatedEquipment.team.name,
                     notice_date: updatedEquipment.notice_date,
-                    process: "unassigned"
+                    process: "unassigned",
+                    order_state: updatedEquipment.order_state,
+                    observation: updatedEquipment.observation
                 };
             }
 
@@ -223,7 +220,9 @@ export class OrdersService {
                 description: updatedEquipment.fault_description,
                 team: updatedEquipment.team.name,
                 notice_date: updatedEquipment.notice_date,
-                process: updatedEquipment.team.process.name
+                process: updatedEquipment.team.process.name,
+                order_state: updatedEquipment.order_state,
+                observation: updatedEquipment.observation
             };
 
         } catch (error) {
@@ -238,7 +237,7 @@ export class OrdersService {
     @ApiResponse({ status: 404, description: "Order not found" })
     @ApiResponse({ status: 304, description: "Order already closed" })
     @ApiResponse({ status: 500, description: "Internal server error" })
-    async updateStateOrder(order_state: boolean, id: string) {
+    async updateStateOrder(order_state: StatusOrder, id: string) {
         const existingOrder = await this.orderRepository.findOne({ where: { id } });
 
         if (!existingOrder) {

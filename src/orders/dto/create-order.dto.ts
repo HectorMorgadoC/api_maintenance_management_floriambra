@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
     IsBoolean,
+    IsEnum,
     IsOptional,
     IsString,
     IsUUID,
@@ -12,6 +13,7 @@ import {
     MinLength,
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { StatusOrder } from "../interface/status-order";
 
 export class CreateOrderDto {
     @ApiProperty({
@@ -55,10 +57,22 @@ export class CreateOrderDto {
 
     @ApiPropertyOptional({
         description: "Order state",
-        default: false,
-        example: true
+        default: StatusOrder.not_tarted,
+        example: "not_started",
+        enum: StatusOrder
     })
-    @IsBoolean()
+    @IsEnum(StatusOrder)
     @IsOptional()
-    order_state: boolean;
+    order_state: StatusOrder;
+
+    @ApiProperty({
+        description: "Observations of the order",
+        maxLength: 200,
+        example: "We are waiting for the acceptance of the spare part quote.",
+        type: "string"
+    })
+    @IsString()
+    @IsOptional()
+    @MaxLength(200)
+    observation?:string
 }
