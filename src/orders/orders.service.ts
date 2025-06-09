@@ -105,7 +105,11 @@ export class OrdersService {
             .leftJoinAndSelect("order.team", "team")
             .leftJoinAndSelect("order.client", "client")
             .leftJoinAndSelect("team.process", "process")
-            .where("order.order_state = :order_state",{ order_state });
+            .where("1=1");
+
+        if (order_state) {
+            queryBuilder.andWhere("order.order_state = :order_state", { order_state });
+        }
 
         if (team) {
             queryBuilder.andWhere("team.id = :teamId", { teamId: team });
