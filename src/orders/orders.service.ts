@@ -181,10 +181,15 @@ export class OrdersService {
             if(!order) {
                 throw new NotFoundException(`Order with id: ${id} not found`)
             }
-            return {
-                id: order?.id,
-                team: order?.team.id,
-                client: order?.client.id
+
+            if(order.order_state != StatusOrder.done) {
+                return {
+                    id: order?.id,
+                    team: order?.team.id,
+                    client: order?.client.id
+                }
+            } else {
+                return {}
             }
         } catch (error) {
             this.handleDbExceptions(error);
@@ -271,15 +276,15 @@ export class OrdersService {
             throw new NotFoundException(`Order with id: ${id} not found`);
         }
 
-        if (existingOrder.order_state) {
-            throw new HttpException(
-                {
-                    statusCode: HttpStatus.NOT_MODIFIED,
-                    message: "Closed order"
-                },
-                HttpStatus.NOT_MODIFIED
-            );
-        }
+        // if (existingOrder.order_state) {
+        //     throw new HttpException(
+        //         {
+        //             statusCode: HttpStatus.NOT_MODIFIED,
+        //             message: "Closed order"
+        //         },
+        //         HttpStatus.NOT_MODIFIED
+        //     );
+        // }
 
         const reportPreload = await this.orderRepository.preload({
             id,
