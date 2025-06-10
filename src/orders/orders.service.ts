@@ -168,6 +168,29 @@ export class OrdersService {
         }
     }
 
+    @ApiOperation({ summary: "Find one order by id" })
+    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 404, description: "Order not found" })
+    @ApiResponse({ status: 500, description: "Internal server error" })
+    async findOneOrderById(id: string) {
+        try {
+            const order = await this.orderRepository.findOne({
+                where: { id },
+                relations: ["team", "client", "team.process"]
+            });
+            if(!order) {
+                throw new NotFoundException(`Order with id: ${id} not found`)
+            }
+            return {
+                id: order?.id,
+                team: order?.team.id,
+                client: order?.client.id
+            }
+        } catch (error) {
+            this.handleDbExceptions(error);
+        }
+    }
+
     @ApiOperation({ summary: "Update an order" })
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 404, description: "Order not found" })
@@ -323,6 +346,11 @@ export class OrdersService {
     }
 
     private handleDbExceptions(error: any) {
+
+        if(error.status === 404 ){
+            throw new NotFoundException(error.message)
+        }
+
         if (error.status === 400) {
             throw new BadRequestException(error.message);
         }

@@ -57,6 +57,21 @@ export class OrdersController {
         return this.ordersService.findWithFilters(_paginationDto);
     }
 
+    @ApiOperation({ summary: 'Get orders by id' })
+    @ApiResponse({ status: 200 })
+    @ApiResponse({ status: 400, description: 'Bad Request.' })
+    @ApiResponse({ status: 401, description: 'Unautorized.' })
+    @ApiResponse({ status: 500, description: 'Internal server error' })
+    @Auth(
+        AccessLevel.admin,
+        AccessLevel.technical_supervisor,
+        AccessLevel.technical,
+    )
+    @Get(':id')
+    findbyid(@Param('id', ParseUUIDPipe) id: string) {
+        return this.ordersService.findOneOrderById(id);
+    }
+
     @ApiOperation({ summary: 'Update an order' })
     @ApiResponse({ status: 200, description: 'Order updated successfully' })
     @ApiResponse({ status: 400, description: 'Bad Request.' })
