@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -84,12 +85,30 @@ export class ClientService {
 
         clients.forEach(client => {
             if(client.access_level != AccessLevel.admin) {
+                if(client.access_level === AccessLevel.technical || 
+                    client.access_level === AccessLevel.technical_supervisor 
+                ){
+                    clientResponse.push({
+                        id: client.id as UUID,
+                        username: client.username,
+                        process: client.process,
+                        access_level: client.access_level
+                })
+                }
                 clientResponse.push({
-                id: client.id as UUID,
-                username: client.username,
-                process: client.process
+                    id: client.id as UUID,
+                    username: client.username,
+                    process: client.process,
+                })
+            } else {
+                clientResponse.push({
+                    id: client.id as UUID,
+                    username: client.username,
+                    process: client.process,
+                    access_level: client.access_level
                 })
             }
+            
         });
 
         if (client.access_level === AccessLevel.admin) {
