@@ -93,13 +93,14 @@ export class ClientService {
                         username: client.username,
                         process: client.process,
                         access_level: client.access_level
-                })
-                }
-                clientResponse.push({
+                    })
+                } else {
+                    clientResponse.push({
                     id: client.id as UUID,
                     username: client.username,
                     process: client.process,
-                })
+                    })
+                }
             } else {
                 clientResponse.push({
                     id: client.id as UUID,
