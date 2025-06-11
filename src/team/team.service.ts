@@ -82,7 +82,7 @@ export class TeamService {
                             model: team.model,
                             working_voltage: team.working_voltage,
                             kilowatts: team.kilowatts,
-                            status: team.is_active,
+                            is_actived: team.is_active,
                             process: "unassigned"
                         };
                     }
@@ -94,7 +94,7 @@ export class TeamService {
                         model: team.model,
                         working_voltage: team.working_voltage,
                         kilowatts: team.kilowatts,
-                        status: team.is_active,
+                        is_actived: team.is_active,
                         process: team.process.name
                     };
                 });
