@@ -77,6 +77,11 @@ export class TeamService {
                         return {
                             id: team.id,
                             name: team.name,
+                            description: team.description,
+                            march: team.march,
+                            model: team.model,
+                            working_voltage: team.working_voltage,
+                            kilowatts: team.kilowatts,
                             status: team.is_active,
                             process: "unassigned"
                         };
@@ -84,6 +89,11 @@ export class TeamService {
                     return {
                         id: team.id,
                         name: team.name,
+                        description: team.description,
+                        march: team.march,
+                        model: team.model,
+                        working_voltage: team.working_voltage,
+                        kilowatts: team.kilowatts,
                         status: team.is_active,
                         process: team.process.name
                     };
