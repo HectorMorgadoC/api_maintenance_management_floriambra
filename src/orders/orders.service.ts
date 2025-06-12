@@ -186,7 +186,8 @@ export class OrdersService {
                 return {
                     id: order?.id,
                     team: order?.team.id,
-                    client: order?.client.id
+                    client: order?.client.id,
+                    fault_description: order.fault_description
                 }
             } else {
                 return {}

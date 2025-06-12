@@ -156,7 +156,7 @@ export class ClientService {
             if (!client.process) {
                 return {
                     client: {
-                        id: client,
+                        id: client.id,
                         username: client.username,
                         access_level: client.access_level,
                         team: [],
@@ -186,7 +186,7 @@ export class ClientService {
 
         return {
             client: {
-                id: client,
+                id: client.id,
                 username: client.username,
                 access_level: client.access_level,
                 teams: teams,
