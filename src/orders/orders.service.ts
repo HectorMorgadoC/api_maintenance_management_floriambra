@@ -35,6 +35,8 @@ export class OrdersService {
     async create(_createOrderDto: CreateOrderDto) {
         const client = await this.clientService.findOnePlain(_createOrderDto.client);
         const team = await this.teamService.findOnePlain(_createOrderDto.team);
+        const { notice_date, ...createOrderDto } = _createOrderDto;
+        const id = await this.generateUniqueCode(new Date(notice_date));
 
         if (client.access_level as AccessLevel === AccessLevel.operator) {
             if (client.process !== team?.process.name) {
@@ -42,7 +44,11 @@ export class OrdersService {
             }
         }
 
-        const newOrder = this.orderRepository.create(_createOrderDto as DeepPartial<Order>);
+        const newOrder = this.orderRepository.create({
+            ...createOrderDto as DeepPartial<Order>,
+            id: id,
+            notice_date: notice_date
+        });
 
         try {
             const savedOrder = await this.orderRepository.save(newOrder);
@@ -160,7 +166,7 @@ export class OrdersService {
     async findOnePlain(id: string) {
         try {
             return this.orderRepository.findOne({
-                where: { id },
+                where: { id: id },
                 relations: ["team", "client", "team.process"]
             });
         } catch (error) {
@@ -172,10 +178,10 @@ export class OrdersService {
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 404, description: "Order not found" })
     @ApiResponse({ status: 500, description: "Internal server error" })
-    async findOneOrderById(id: string) {
+    async findOneOrderByCode(id: string) {
         try {
             const order = await this.orderRepository.findOne({
-                where: { id },
+                where: { id: id },
                 relations: ["team", "client", "team.process"]
             });
             if(!order) {
@@ -204,14 +210,14 @@ export class OrdersService {
     @ApiResponse({ status: 500, description: "Internal server error" })
     async update(id: string, _updateOrderDto: UpdateOrderDto) {
         const { notice_date, ...res } = _updateOrderDto;
-        const existingOrder = await this.orderRepository.findOne({ where: { id } });
+        const existingOrder = await this.orderRepository.findOne({ where: { id: id } });
 
         if (!existingOrder) {
             throw new NotFoundException(`Order with id: ${id} not found`);
         }
 
         const orderPreload = await this.orderRepository.preload({
-            id,
+            id: id,
             notice_date: notice_date ? notice_date : existingOrder.notice_date,
             ...res as DeepPartial<Order>
         });
@@ -271,7 +277,7 @@ export class OrdersService {
     @ApiResponse({ status: 304, description: "Order already closed" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async updateStateOrder(order_state: StatusOrder, id: string) {
-        const existingOrder = await this.orderRepository.findOne({ where: { id } });
+        const existingOrder = await this.orderRepository.findOne({ where: { id: id } });
 
         if (!existingOrder) {
             throw new NotFoundException(`Order with id: ${id} not found`);
@@ -288,7 +294,7 @@ export class OrdersService {
         // }
 
         const reportPreload = await this.orderRepository.preload({
-            id,
+            id: id,
             order_state
         });
 
@@ -317,7 +323,7 @@ export class OrdersService {
     @ApiResponse({ status: 404, description: "Order not found" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async remove(id: string) {
-        const order = await this.orderRepository.findOne({ where: { id } });
+        const order = await this.orderRepository.findOne({ where: { id: id } });
 
         if (!order) {
             throw new NotFoundException(`Order with id: ${id} not found`);
@@ -325,7 +331,7 @@ export class OrdersService {
 
         const query = this.orderRepository.createQueryBuilder("order");
         try {
-            await query.delete().where("id = :id", { id }).execute();
+            await query.delete().where("id = :id", { code: id }).execute();
         } catch (error) {
             this.handleDbExceptions(error);
         }
@@ -349,6 +355,44 @@ export class OrdersService {
         } catch (error) {
             this.handleDbExceptions(error);
         }
+    }
+
+
+    async generateUniqueCode(date: Date): Promise<string> {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        const datePrefix = `${day}${month}${year}`
+
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0,0,0,0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23,59,59,999);
+
+        const lastOrderOfDay = await this.orderRepository
+            .createQueryBuilder('order')
+            .where('order.notice_date >= :startOfDay',{ startOfDay})
+            .andWhere('order.notice_date <= :endOfDay',{ endOfDay})
+            .andWhere('order.code LIKE :prefix', { prefix: `${datePrefix}-%`})
+            .orderBy('order.code', 'DESC')
+            .getOne()
+
+        let nextNumber = 1;
+
+        if (lastOrderOfDay) {
+            const codeParts = lastOrderOfDay.id.split('-');
+
+            if ( codeParts.length === 2) {
+                const lastNumber = parseInt(codeParts[1])
+                nextNumber = lastNumber + 1
+            }
+        }
+
+        const formattedNumber = String(nextNumber).padStart(3,'0');
+        const finalCode = `${datePrefix}-${formattedNumber}`;
+        return finalCode
     }
 
     private handleDbExceptions(error: any) {

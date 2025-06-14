@@ -3,7 +3,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
-    IsBoolean,
     IsEnum,
     IsOptional,
     IsString,
@@ -16,6 +15,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { StatusOrder } from "../interface/status-order";
 
 export class CreateOrderDto {
+
     @ApiProperty({
         description: "ID Team",
         example: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",

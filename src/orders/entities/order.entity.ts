@@ -4,21 +4,32 @@
 /* eslint-disable prettier/prettier */
 import { Team } from "src/team/entities/team.entity";
 import { Report } from "src/reports/entities/report.entity";
-import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { Client } from "src/client/entities/client.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { StatusOrder } from "../interface/status-order";
 
 @Entity()
 export class Order {
+    // @ApiProperty({
+    //     description: "The unique identifier for the order",
+    //     example: "e7c6d8f9-0a1b-2c3d-4e5f-6g7h8i9j0k1l",
+    //     uniqueItems: true,
+    //     type: "string"
+    // })
+    // @PrimaryGeneratedColumn("uuid")
+    // id: string;
+
     @ApiProperty({
-        description: "The unique identifier for the order",
-        example: "e7c6d8f9-0a1b-2c3d-4e5f-6g7h8i9j0k1l",
+        description: "The unique code for the order",
+        example: "20121209-001",
         uniqueItems: true,
         type: "string"
     })
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
+    @PrimaryColumn({
+        unique: true
+    })
+    id: string
 
     @ApiProperty({
         description: "Date when the order was noticed",

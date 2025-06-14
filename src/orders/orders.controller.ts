@@ -7,8 +7,8 @@ import {
     Patch,
     Param,
     Delete,
-    ParseUUIDPipe,
     Query,
+    UsePipes,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -17,6 +17,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Auth } from 'src/client/decorators/auth.decorator';
 import { AccessLevel } from 'src/client/interfaces/access-level.inteface';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { CustomFormatPipe } from 'src/common/pipe/custom-format.pipe';
 
 @ApiTags('Orders')
 @Controller('order')
@@ -57,7 +58,7 @@ export class OrdersController {
         return this.ordersService.findWithFilters(_paginationDto);
     }
 
-    @ApiOperation({ summary: 'Get orders by id' })
+    @ApiOperation({ summary: 'Get orders by code' })
     @ApiResponse({ status: 200 })
     @ApiResponse({ status: 400, description: 'Bad Request.' })
     @ApiResponse({ status: 401, description: 'Unautorized.' })
@@ -68,8 +69,9 @@ export class OrdersController {
         AccessLevel.technical,
     )
     @Get(':id')
-    findbyid(@Param('id', ParseUUIDPipe) id: string) {
-        return this.ordersService.findOneOrderById(id);
+    @UsePipes(CustomFormatPipe)
+    findbyCode(@Param('id') id: string) {
+        return this.ordersService.findOneOrderByCode(id);
     }
 
     @ApiOperation({ summary: 'Update an order' })
@@ -86,7 +88,7 @@ export class OrdersController {
     )
     @Patch(':id')
     update(
-        @Param('id', ParseUUIDPipe) id: string,
+        @Param('id',new CustomFormatPipe()) id: string,
         @Body() updateOrderDto: UpdateOrderDto,
     ) {
         return this.ordersService.update(id, updateOrderDto);
@@ -104,7 +106,8 @@ export class OrdersController {
         AccessLevel.technical_supervisor,
     )
     @Delete(':id')
-    remove(@Param('id', ParseUUIDPipe) id: string) {
+    @UsePipes(CustomFormatPipe)
+    remove(@Param('id') id: string) {
         return this.ordersService.remove(id);
     }
 }
