@@ -8,7 +8,6 @@ import {
     Patch,
     Param,
     Delete,
-    ParseUUIDPipe,
     Query,
     ParseBoolPipe,
 } from "@nestjs/common";
@@ -19,6 +18,7 @@ import { PaginationDto } from "src/common/dto/pagination.dto";
 import { Auth } from "src/client/decorators/auth.decorator";
 import { AccessLevel } from "src/client/interfaces/access-level.inteface";
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from "@nestjs/swagger";
+import { CustomFormatPipe } from "src/common/pipe/custom-format.pipe";
 
 @ApiTags("Reports")
 @Controller("report")
@@ -48,7 +48,7 @@ export class ReportsController {
     @ApiResponse({ status: 404, description: "Report not found." })
     @Auth(AccessLevel.admin, AccessLevel.technical_supervisor)
     @Patch(":id")
-    update(@Param("id", ParseUUIDPipe) id: string, @Body() updateReportDto: UpdateReportDto) {
+    update(@Param("id", new CustomFormatPipe()) id: string, @Body() updateReportDto: UpdateReportDto) {
         return this.reportsService.update(id, updateReportDto);
     }
 
@@ -59,7 +59,7 @@ export class ReportsController {
     @Auth(AccessLevel.admin, AccessLevel.production_supervisor)
     @Patch("/production_approval/:id/:production_approval")
     updateProductionAproval(
-        @Param("id", ParseUUIDPipe) id: string,
+        @Param("id", new CustomFormatPipe()) id: string,
         @Param("production_approval", ParseBoolPipe) production_approval: boolean
     ) {
         return this.reportsService.updateProductionAproval(id, production_approval);
@@ -72,7 +72,7 @@ export class ReportsController {
     @Auth(AccessLevel.admin, AccessLevel.technical_supervisor)
     @Patch("/maintenance_approval/:id/:maintenance_approval")
     updateMaintenanceAproval(
-        @Param("id", ParseUUIDPipe) id: string,
+        @Param("id", new CustomFormatPipe()) id: string,
         @Param("maintenance_approval", ParseBoolPipe) maintenance_approval: boolean
     ) {
         return this.reportsService.updateMaintenanceAproval(id, maintenance_approval);
@@ -84,7 +84,7 @@ export class ReportsController {
     @ApiResponse({ status: 404, description: "Report not found." })
     @Auth(AccessLevel.admin, AccessLevel.technical_supervisor)
     @Delete(":id")
-    remove(@Param("id", ParseUUIDPipe) id: string) {
+    remove(@Param("id", new CustomFormatPipe()) id: string) {
         return this.reportsService.remove(id);
     }
 }

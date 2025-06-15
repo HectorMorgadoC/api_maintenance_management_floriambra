@@ -13,11 +13,14 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateReportDto {
     @ApiProperty({
-        description: "Order UUID",
-        example: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-        type: "string"
+        description: "Order ID",
+        example: "11092024-001",
+        type: "string",
     })
-    @IsUUID()
+    @IsString()
+    @Matches(/^\d{8}-\d{3}$/, {
+    message: 'The ID must be in the format YYYYMMDD-XXX (8 digits)-(3 digits)', 
+    })
     order: string;
 
     @ApiProperty({

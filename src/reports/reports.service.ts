@@ -33,7 +33,7 @@ export class ReportsService {
     @ApiResponse({ status: 400, description: "Bad request" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async create(_createReportDto: CreateReportDto) {
-        const newReport = _createReportDto;
+        const { from_date,...newReport} = _createReportDto;
         const clientRequest = await this.clientService.findOnePlain(newReport.client);
 
         if (
@@ -44,8 +44,15 @@ export class ReportsService {
             throw new BadRequestException(`the client ${clientRequest.username} does not have an authorized role`);
         }
 
+        const id = await this.generateUniqueCode(new Date(from_date));
+
         try {
-            const savedReport = await this.reportRepository.save(newReport as unknown as DeepPartial<Report>);
+            const savedReport = await this.reportRepository.save({ 
+                ...newReport as DeepPartial<Report>,
+                id: id,
+                from_date: from_date
+            });
+            
             const newRegisterReport = await this.reportRepository.findOne({
                 where: { id: savedReport.id },
                 relations: ["client", "order", "order.client", "order.team"]
@@ -338,6 +345,44 @@ export class ReportsService {
             this.handleDbExceptions(error);
         }
     }
+
+    async generateUniqueCode(date: Date): Promise<string> {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        const datePrefix = `${day}${month}${year}`
+
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0,0,0,0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23,59,59,999);
+
+        const lastOrderOfDay = await this.reportRepository
+            .createQueryBuilder('report')
+            .where('report.from_date >= :startOfDay',{ startOfDay})
+            .andWhere('report.from_date <= :endOfDay',{ endOfDay})
+            .andWhere('report.id LIKE :prefix', { prefix: `${datePrefix}-%`})
+            .orderBy('report.id', 'DESC')
+            .getOne()
+
+        let nextNumber = 1;
+
+        if (lastOrderOfDay) {
+            const codeParts = lastOrderOfDay.id.split('-');
+
+            if ( codeParts.length === 2) {
+                const lastNumber = parseInt(codeParts[1])
+                nextNumber = lastNumber + 1
+            }
+        }
+
+        const formattedNumber = String(nextNumber).padStart(3,'0');
+        const finalCode = `${datePrefix}-${formattedNumber}`;
+        return finalCode
+    }
+
 
     @ApiOperation({ summary: "Remove reports for user order" })
     @ApiResponse({ status: 200, description: "Reports removed successfully" })

@@ -331,7 +331,7 @@ export class OrdersService {
 
         const query = this.orderRepository.createQueryBuilder("order");
         try {
-            await query.delete().where("id = :id", { code: id }).execute();
+            await query.delete().where("id = :id", { id: id }).execute();
         } catch (error) {
             this.handleDbExceptions(error);
         }
@@ -375,8 +375,8 @@ export class OrdersService {
             .createQueryBuilder('order')
             .where('order.notice_date >= :startOfDay',{ startOfDay})
             .andWhere('order.notice_date <= :endOfDay',{ endOfDay})
-            .andWhere('order.code LIKE :prefix', { prefix: `${datePrefix}-%`})
-            .orderBy('order.code', 'DESC')
+            .andWhere('order.id LIKE :prefix', { prefix: `${datePrefix}-%`})
+            .orderBy('order.id', 'DESC')
             .getOne()
 
         let nextNumber = 1;

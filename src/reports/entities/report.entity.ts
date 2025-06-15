@@ -4,14 +4,24 @@
 /* eslint-disable prettier/prettier */
 import { Order } from "src/orders/entities/order.entity";
 import { Client } from "src/client/entities/client.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { ApiProperty } from "@nestjs/swagger";
 
 @Entity()
 export class Report {
-    @ApiProperty({ description: "Unique identifier UUID" })
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
+    //@ApiProperty({ description: "Unique identifier UUID" })
+    //@PrimaryGeneratedColumn("uuid")
+    //id: string;
+    @ApiProperty({
+            description: "The unique code for the report",
+            example: "20121209-001",
+            uniqueItems: true,
+            type: "string"
+        })
+        @PrimaryColumn({
+            unique: true
+        })
+        id: string
 
     @ApiProperty({ 
         description: "Start date of the report",
