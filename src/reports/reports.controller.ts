@@ -36,7 +36,7 @@ export class ReportsController {
 
     @ApiOperation({ summary: "Get all reports with filters" })
     @ApiResponse({ status: 200, description: "Return all reports." })
-    @Auth(AccessLevel.admin, AccessLevel.technical_supervisor, AccessLevel.technical)
+    @Auth(AccessLevel.admin, AccessLevel.technical_supervisor, AccessLevel.technical, AccessLevel.production_supervisor)
     @Get()
     findWithFilters(@Query() _paginationDto: PaginationDto) {
         return this.reportsService.findWithFilters(_paginationDto);
