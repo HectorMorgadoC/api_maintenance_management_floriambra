@@ -28,6 +28,7 @@ import { Client } from "./client/entities/client.entity";
             entities:[Process,Team,Order,Report,Client],
             synchronize: true,
             extra: { 
+                ssl: true,
                 timezone: 'Z'
             }
         }),
