@@ -1,13 +1,9 @@
-
 services:
-  db:
-    image: postgres:14.3
-    restart: always
+  nestjs-app:
+    image: floriambra_report_api
+    container_name: nestjs_api
     ports:
-      - "0.0.0.0:5432:5432"
+      - "5000:5000"
+    restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    container_name: MAINTENANCE_MANAGEMENT
-    volumes:
-      - ./postgres:/var/lib/postgresql/data
+      NODE_ENV: production

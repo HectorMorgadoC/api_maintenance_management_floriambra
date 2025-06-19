@@ -69,6 +69,29 @@ $ yarn install -g mau
 $ mau deploy
 ```
 
+## Dockerfile for development database
+
+```yml
+services:
+  db:
+    image: postgres:14.3
+    restart: always
+    ports:
+      - "0.0.0.0:5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    container_name: MAINTENANCE_MANAGEMENT
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+```
+
+
+
+
+
+
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
 ## Resources
@@ -97,3 +120,4 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
