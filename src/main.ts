@@ -4,12 +4,15 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import helmet from "helmet";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
+    app.use(helmet());
+
     app.enableCors({
-        origin: "*",
+        origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
         methods: "GET,PATCH,POST,DELETE",
         exposedHeaders: ['Authorization']
     });
