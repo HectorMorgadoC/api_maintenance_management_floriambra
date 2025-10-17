@@ -1,13 +1,15 @@
-/* eslint-disable no-empty */
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable indent */
+
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+ 
+import {
+    BadRequestException,
+    Injectable,
+    InternalServerErrorException,
+    NotFoundException,
+    UnauthorizedException,
+} from "@nestjs/common";
 import { CreateClientDto } from "./dto/create-client.dto";
 import { UpdateClientDto } from "./dto/update-client.dto";
 import { Client } from "./entities/client.entity";
@@ -38,7 +40,7 @@ export class ClientService {
         private readonly teamService: TeamService,
         private readonly processService: ProcessService,
         private readonly reportsService: ReportsService,
-        private readonly ordersService: OrdersService
+        private readonly ordersService: OrdersService,
     ) { }
 
     @ApiOperation({ summary: "Login a client" })
@@ -55,9 +57,9 @@ export class ClientService {
                 id: true,
                 access_level: true,
                 is_active: true,
-                process: { name: true }
+                process: { name: true },
             },
-            relations: ["process"]
+            relations: ["process"],
         });
 
         if (!client) {
@@ -76,40 +78,42 @@ export class ClientService {
             sub: client.id as UUID,
             access_level: client.access_level,
             process: client.process?.name,
-        }
+        };
         const token = this.getJwtToken(payload);
-        const teams = await this.teamService.findAll(client.access_level as AccessLevel);
+        const teams = await this.teamService.findAll(
+            client.access_level as AccessLevel,
+        );
         const process = await this.processService.findAll();
         const clients = await this.findAll();
         const clientResponse: ClientResult[] = [];
 
-        clients.forEach(client => {
-            if(client.access_level != AccessLevel.admin) {
-                if(client.access_level === AccessLevel.technical || 
-                    client.access_level === AccessLevel.technical_supervisor 
-                ){
+        clients.forEach((client) => {
+            if (client.access_level != AccessLevel.admin) {
+                if (
+                    client.access_level === AccessLevel.technical ||
+                    client.access_level === AccessLevel.technical_supervisor
+                ) {
                     clientResponse.push({
                         id: client.id as UUID,
                         username: client.username,
                         process: client.process,
-                        access_level: client.access_level
-                    })
+                        access_level: client.access_level,
+                    });
                 } else {
                     clientResponse.push({
-                    id: client.id as UUID,
-                    username: client.username,
-                    process: client.process,
-                    })
+                        id: client.id as UUID,
+                        username: client.username,
+                        process: client.process,
+                    });
                 }
             } else {
                 clientResponse.push({
                     id: client.id as UUID,
                     username: client.username,
                     process: client.process,
-                    access_level: client.access_level
-                })
+                    access_level: client.access_level,
+                });
             }
-            
         });
 
         if (client.access_level === AccessLevel.admin) {
@@ -120,9 +124,9 @@ export class ClientService {
                     access_level: client.access_level,
                     teams: teams,
                     process: process,
-                    clients: clientResponse
+                    clients: clientResponse,
                 },
-                token
+                token,
             };
         }
 
@@ -133,9 +137,9 @@ export class ClientService {
                     username: client.username,
                     access_level: client.access_level,
                     teams: teams,
-                    clients: clientResponse
+                    clients: clientResponse,
                 },
-                token
+                token,
             };
         }
 
@@ -146,11 +150,11 @@ export class ClientService {
                     username: client.username,
                     access_level: client.access_level,
                     teams: teams,
-                    clients: clientResponse
+                    clients: clientResponse,
                 },
-                token
+                token,
             };
-        }   
+        }
 
         if (client.access_level === AccessLevel.operator) {
             if (!client.process) {
@@ -160,9 +164,9 @@ export class ClientService {
                         username: client.username,
                         access_level: client.access_level,
                         team: [],
-                        clients: []
+                        clients: [],
                     },
-                    token
+                    token,
                 };
             } else {
                 return {
@@ -170,16 +174,16 @@ export class ClientService {
                         id: client.id,
                         username: client.username,
                         access_level: client.access_level,
-                        teams: teams?.filter(team => {
+                        teams: teams?.filter((team) => {
                             const teamProcess = team?.process;
                             if (client.process.name === teamProcess)
                                 return {
-                                    team
+                                    team,
                                 };
                         }),
-                        clients:[]
+                        clients: [],
                     },
-                    token
+                    token,
                 };
             }
         }
@@ -190,24 +194,22 @@ export class ClientService {
                 username: client.username,
                 access_level: client.access_level,
                 teams: teams,
-                clients: clientResponse
+                clients: clientResponse,
             },
-            token
+            token,
         };
     }
     checkAuthStatus(client: Client) {
         return {
             username: client.username,
-            access_level : client.access_level,
-            process: client.process,
-            token: this.getJwtToken( 
-                { 
-                    sub: client.id as UUID,
-                    access_level: client.access_level,
-                    process: client.process?.name
-                } 
-            )
-        }
+            access_level: client.access_level,
+            process: client.process.name,
+            token: this.getJwtToken({
+                sub: client.id as UUID,
+                access_level: client.access_level,
+                process: client.process?.name,
+            }),
+        };
     }
 
     @ApiOperation({ summary: "Create a new client" })
@@ -217,17 +219,15 @@ export class ClientService {
     async create(_createUserDto: CreateClientDto) {
         try {
             const { password, ...rest } = _createUserDto as DeepPartial<Client>;
-            const client = this.clientRepository.create(
-                {
-                    ...rest,
-                    password: bcrypt.hashSync(password as string, 10),
-                }
-            );
+            const client = this.clientRepository.create({
+                ...rest,
+                password: bcrypt.hashSync(password as string, 10),
+            });
 
             await this.clientRepository.save(client);
             return {
                 username: client.username,
-                access_level: client.access_level
+                access_level: client.access_level,
             };
         } catch (error) {
             this.handleDBException(error);
@@ -235,11 +235,14 @@ export class ClientService {
     }
 
     @ApiOperation({ summary: "Get all client" })
-    @ApiResponse({ status: 200, description: "List of users retrieved successfully" })
+    @ApiResponse({
+        status: 200,
+        description: "List of users retrieved successfully",
+    })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async findAll() {
         const client = await this.clientRepository.find({
-            relations: ["process"]
+            relations: ["process"],
         });
         const userReturn = client.map((user) => {
             if (!user.process) {
@@ -248,7 +251,7 @@ export class ClientService {
                     username: user.username,
                     access_level: user.access_level,
                     email: user.email,
-                    process: "unassigned"
+                    process: "unassigned",
                 };
             }
 
@@ -257,7 +260,7 @@ export class ClientService {
                 username: user.username,
                 access_level: user.access_level,
                 email: user.email,
-                process: user.process.name
+                process: user.process.name,
             };
         });
         return userReturn;
@@ -268,7 +271,10 @@ export class ClientService {
     @ApiResponse({ status: 404, description: "Client not found" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async findOnePlain(id: string) {
-        const client = await this.clientRepository.findOne({ where: { id }, relations: ["process"] });
+        const client = await this.clientRepository.findOne({
+            where: { id },
+            relations: ["process"],
+        });
 
         if (!client) {
             throw new NotFoundException(`Client with id: ${id} not found`);
@@ -280,7 +286,7 @@ export class ClientService {
                 username: client.username,
                 access_level: client.access_level,
                 email: client.email,
-                process: "unassigned"
+                process: "unassigned",
             };
         }
 
@@ -289,7 +295,7 @@ export class ClientService {
             username: client.username,
             access_level: client.access_level,
             email: client.email,
-            process: client.process.name
+            process: client.process.name,
         };
     }
 
@@ -298,9 +304,12 @@ export class ClientService {
     @ApiResponse({ status: 404, description: "Client not found" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async update(id: string, _updateUserDto: UpdateClientDto) {
-        const { process, access_level, password,...rest } = _updateUserDto;
+        const { process, access_level, password, ...rest } = _updateUserDto;
 
-        const existingClient = await this.clientRepository.findOne({ where: { id }, relations: ["process"] });
+        const existingClient = await this.clientRepository.findOne({
+            where: { id },
+            relations: ["process"],
+        });
 
         if (!existingClient) {
             throw new NotFoundException(`Client with id: ${id} not found`);
@@ -308,10 +317,13 @@ export class ClientService {
 
         const userPreload = await this.clientRepository.preload({
             id,
-            ...rest as DeepPartial<Client>,
-            password: password && password.length > 0 ? bcrypt.hashSync(password, 10) : existingClient.password,
+            ...(rest as DeepPartial<Client>),
+            password:
+                password && password.length > 0
+                    ? bcrypt.hashSync(password, 10)
+                    : existingClient.password,
             process: process ? { id: process } : existingClient.process,
-            access_level: access_level ? access_level : existingClient.access_level
+            access_level: access_level ? access_level : existingClient.access_level,
         } as DeepPartial<Client>);
 
         if (!userPreload) {
@@ -362,9 +374,8 @@ export class ClientService {
     }
 
     private handleDBException(error: any): never {
-        if (error.code === "23505")
-            throw new BadRequestException(error.detail);
+        if (error.code === "23505") throw new BadRequestException(error.detail);
 
         throw new InternalServerErrorException("Please check server logs");
     }
-}   
+}

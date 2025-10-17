@@ -18,19 +18,19 @@ import { Client } from "./client/entities/client.entity";
     imports: [
         ConfigModule.forRoot(),
         TypeOrmModule.forRoot({
-            type: 'postgres',
+            type: "postgres",
             host: process.env.DB_HOST,
             port: process.env.DB_PORT ? +process.env.DB_PORT : 5432,
             database: process.env.DB_NAME,
             username: process.env.DB_USERNAME,
             password: process.env.DB_PASSWORD,
             autoLoadEntities: true,
-            entities:[Process,Team,Order,Report,Client],
+            entities: [Process, Team, Order, Report, Client],
             synchronize: true,
-            extra: { 
+            extra: {
                 ssl: true,
-                timezone: 'Z'
-            }
+                timezone: "Z",
+            },
         }),
         ClientModule,
         TeamModule,
@@ -40,5 +40,4 @@ import { Client } from "./client/entities/client.entity";
         CommonModule,
     ],
 })
-export class AppModule {
-}
+export class AppModule { }
