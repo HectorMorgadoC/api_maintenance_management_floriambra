@@ -15,29 +15,29 @@ import { Report } from "./reports/entities/report.entity";
 import { Client } from "./client/entities/client.entity";
 
 @Module({
-    imports: [
-        ConfigModule.forRoot(),
-        TypeOrmModule.forRoot({
-            type: "postgres",
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT ? +process.env.DB_PORT : 5432,
-            database: process.env.DB_NAME,
-            username: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
-            autoLoadEntities: true,
-            entities: [Process, Team, Order, Report, Client],
-            synchronize: true,
-            extra: {
-                ssl: true,
-                timezone: "Z",
-            },
-        }),
-        ClientModule,
-        TeamModule,
-        ProcessModule,
-        OrdersModule,
-        ReportsModule,
-        CommonModule,
-    ],
+  imports: [
+    ConfigModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: "postgres",
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT ? +process.env.DB_PORT : 5432,
+      database: process.env.DB_NAME,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      autoLoadEntities: true,
+      entities: [Process, Team, Order, Report, Client],
+      synchronize: true,
+      extra: {
+        ssl: process.env.STATE_SSL === "true",
+        timezone: "Z",
+      },
+    }),
+    ClientModule,
+    TeamModule,
+    ProcessModule,
+    OrdersModule,
+    ReportsModule,
+    CommonModule,
+  ],
 })
-export class AppModule { }
+export class AppModule {}
