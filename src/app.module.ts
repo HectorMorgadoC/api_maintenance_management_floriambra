@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable indent */
 import { Module } from "@nestjs/common";
 import { ClientModule } from "./client/client.module";
 import { TeamModule } from "./team/team.module";
@@ -29,7 +30,6 @@ import { Client } from "./client/entities/client.entity";
       synchronize: true,
       extra: {
         ssl: process.env.STATE_SSL === "true",
-        timezone: "Z",
       },
     }),
     ClientModule,
