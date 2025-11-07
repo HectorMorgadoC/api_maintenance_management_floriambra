@@ -1,8 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+
+import {
+    BadRequestException,
+    forwardRef,
+    HttpException,
+    HttpStatus,
+    Inject,
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from "@nestjs/common";
 import { CreateReportDto } from "./dto/create-report.dto";
 import { UpdateReportDto } from "./dto/update-report.dto";
 import { DataSource, DeepPartial, Repository } from "typeorm";
@@ -12,6 +22,7 @@ import { PaginationDto } from "src/common/dto/pagination.dto";
 import { OrdersService } from "src/orders/orders.service";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { ClientService } from "src/client/client.service";
+import { EmailService } from "src/email/email.service";
 import { AccessLevel } from "src/client/interfaces/access-level.inteface";
 import { StatusOrder } from "src/orders/interface/status-order";
 
@@ -23,46 +34,64 @@ export class ReportsService {
         @InjectRepository(Report)
         private readonly reportRepository: Repository<Report>,
         private readonly orderService: OrdersService,
+        private readonly emailService: EmailService,
         private readonly dataSourse: DataSource,
         @Inject(forwardRef(() => ClientService))
-        private readonly clientService: ClientService
-    ) {}
+        private readonly clientService: ClientService,
+    ) { }
 
     @ApiOperation({ summary: "Create a new report" })
     @ApiResponse({ status: 201, description: "Report created successfully" })
     @ApiResponse({ status: 400, description: "Bad request" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async create(_createReportDto: CreateReportDto) {
-        const { from_date,...newReport} = _createReportDto;
-        const clientRequest = await this.clientService.findOnePlain(newReport.client);
+        const { from_date, ...newReport } = _createReportDto;
+        const clientRequest = await this.clientService.findOnePlain(
+            newReport.client,
+        );
 
         if (
-            clientRequest.access_level as AccessLevel != AccessLevel.technical &&
-            clientRequest.access_level as AccessLevel != AccessLevel.technical_supervisor &&
-            clientRequest.access_level as AccessLevel != AccessLevel.admin
+            (clientRequest.access_level as AccessLevel) != AccessLevel.technical &&
+            (clientRequest.access_level as AccessLevel) !=
+            AccessLevel.technical_supervisor &&
+            (clientRequest.access_level as AccessLevel) != AccessLevel.admin
         ) {
-            throw new BadRequestException(`the client ${clientRequest.username} does not have an authorized role`);
+            throw new BadRequestException(
+                `the client ${clientRequest.username} does not have an authorized role`,
+            );
         }
 
         const id = await this.generateUniqueCode(new Date(from_date));
 
         try {
-            const savedReport = await this.reportRepository.save({ 
-                ...newReport as DeepPartial<Report>,
+            const savedReport = await this.reportRepository.save({
+                ...(newReport as DeepPartial<Report>),
                 id: id,
-                from_date: from_date
+                from_date: from_date,
             });
-            
+
             const newRegisterReport = await this.reportRepository.findOne({
                 where: { id: savedReport.id },
-                relations: ["client", "order", "order.client", "order.team"]
+                relations: ["client", "order", "order.client", "order.team"],
             });
 
             if (!newRegisterReport) {
-                throw new InternalServerErrorException("Error retrieving created order");
+                throw new InternalServerErrorException(
+                    "Error retrieving created order",
+                );
             }
 
-            await this.orderService.updateStateOrder(StatusOrder.done, newRegisterReport.order.id);
+            await this.orderService.updateStateOrder(
+                StatusOrder.done,
+                newRegisterReport.order.id,
+            );
+
+            await this.emailService.ReportRegisterEmail(
+                newRegisterReport.order.id,
+                newRegisterReport.id,
+                newRegisterReport.order.team.name,
+                newRegisterReport.client.username,
+            );
 
             return {
                 id_report: newRegisterReport.id,
@@ -76,7 +105,7 @@ export class ReportsService {
                 end_date: newRegisterReport.end_date,
                 summary_of_activities: newRegisterReport.summary_of_activities,
                 used_spare_parts: newRegisterReport.used_spare_parts,
-                remarks: newRegisterReport.remarks
+                remarks: newRegisterReport.remarks,
             };
         } catch (error) {
             this.handleDbExceptions(error);
@@ -101,13 +130,15 @@ export class ReportsService {
         }
 
         if (client) {
-            queryBuilder.andWhere("reportClient.id = :ClientId", { ClientId: client });
+            queryBuilder.andWhere("reportClient.id = :ClientId", {
+                ClientId: client,
+            });
         }
 
         if (date_time) {
             const dateObj = new Date(date_time);
             queryBuilder.andWhere("DATE(order.notice_date) = DATE(:date)", {
-                date: dateObj.toISOString()
+                date: dateObj.toISOString(),
             });
         }
 
@@ -131,7 +162,7 @@ export class ReportsService {
                 used_spare_parts: report.used_spare_parts,
                 remarks: report.remarks,
                 maintenance_approval: report.maintenance_approval,
-                production_approval: report.production_approval
+                production_approval: report.production_approval,
             };
         });
     }
@@ -144,7 +175,7 @@ export class ReportsService {
         try {
             return this.reportRepository.findOne({
                 where: { id },
-                relations: ["order", "client", "order.team", "order.client"]
+                relations: ["order", "client", "order.team", "order.client"],
             });
         } catch (error) {
             this.handleDbExceptions(error);
@@ -158,7 +189,9 @@ export class ReportsService {
     async update(id: string, _updateReportDto: UpdateReportDto) {
         const updatedReport = _updateReportDto;
 
-        const existingReport = await this.reportRepository.findOne({ where: { id } });
+        const existingReport = await this.reportRepository.findOne({
+            where: { id },
+        });
 
         if (!existingReport) {
             throw new NotFoundException(`Report with id: ${id} not found`);
@@ -166,7 +199,7 @@ export class ReportsService {
 
         const reportPreload = await this.reportRepository.preload({
             id,
-            ...updatedReport as DeepPartial<Report>
+            ...(updatedReport as DeepPartial<Report>),
         });
 
         if (!reportPreload) {
@@ -204,7 +237,7 @@ export class ReportsService {
                 used_spare_parts: updatedEquipment.used_spare_parts,
                 remarks: updatedEquipment.remarks,
                 maintenance_approval: updatedEquipment.maintenance_approval,
-                production_approval: updatedEquipment.production_approval
+                production_approval: updatedEquipment.production_approval,
             };
         } catch (error) {
             await queryRunner.rollbackTransaction();
@@ -214,11 +247,19 @@ export class ReportsService {
     }
 
     @ApiOperation({ summary: "Update production approval status" })
-    @ApiResponse({ status: 200, description: "Production approval updated successfully" })
-    @ApiResponse({ status: 304, description: "Report already approved by production" })
+    @ApiResponse({
+        status: 200,
+        description: "Production approval updated successfully",
+    })
+    @ApiResponse({
+        status: 304,
+        description: "Report already approved by production",
+    })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async updateProductionAproval(id: string, production_approval: boolean) {
-        const existingReport = await this.reportRepository.findOne({ where: { id } });
+        const existingReport = await this.reportRepository.findOne({
+            where: { id },
+        });
 
         if (!existingReport) {
             throw new NotFoundException(`Report with id: ${id} not found`);
@@ -228,15 +269,15 @@ export class ReportsService {
             throw new HttpException(
                 {
                     statusCode: HttpStatus.NOT_MODIFIED,
-                    message: "Report already approved by production"
+                    message: "Report already approved by production",
                 },
-                HttpStatus.NOT_MODIFIED
+                HttpStatus.NOT_MODIFIED,
             );
         }
 
         const reportPreload = await this.reportRepository.preload({
             id,
-            production_approval
+            production_approval,
         });
 
         if (!reportPreload) {
@@ -253,7 +294,7 @@ export class ReportsService {
 
             return {
                 maintenance_approval: updatedReport.maintenance_approval,
-                production_approval: updatedReport.production_approval
+                production_approval: updatedReport.production_approval,
             };
         } catch (error) {
             this.handleDbExceptions(error);
@@ -261,11 +302,19 @@ export class ReportsService {
     }
 
     @ApiOperation({ summary: "Update maintenance approval status" })
-    @ApiResponse({ status: 200, description: "Maintenance approval updated successfully" })
-    @ApiResponse({ status: 304, description: "Report already approved by maintenance" })
+    @ApiResponse({
+        status: 200,
+        description: "Maintenance approval updated successfully",
+    })
+    @ApiResponse({
+        status: 304,
+        description: "Report already approved by maintenance",
+    })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async updateMaintenanceAproval(id: string, maintenance_approval: boolean) {
-        const existingReport = await this.reportRepository.findOne({ where: { id } });
+        const existingReport = await this.reportRepository.findOne({
+            where: { id },
+        });
 
         if (!existingReport) {
             throw new NotFoundException(`Report with id: ${id} not found`);
@@ -275,15 +324,15 @@ export class ReportsService {
             throw new HttpException(
                 {
                     statusCode: HttpStatus.NOT_MODIFIED,
-                    message: "Report already approved by maintenance"
+                    message: "Report already approved by maintenance",
                 },
-                HttpStatus.NOT_MODIFIED
+                HttpStatus.NOT_MODIFIED,
             );
         }
 
         const reportPreload = await this.reportRepository.preload({
             id,
-            maintenance_approval
+            maintenance_approval,
         });
 
         if (!reportPreload) {
@@ -300,7 +349,7 @@ export class ReportsService {
 
             return {
                 maintenance_approval: updatedReport.maintenance_approval,
-                production_approval: updatedReport.production_approval
+                production_approval: updatedReport.production_approval,
             };
         } catch (error) {
             this.handleDbExceptions(error);
@@ -332,11 +381,13 @@ export class ReportsService {
     @ApiResponse({ status: 500, description: "Internal server error" })
     async removeForClient(id: string) {
         const reports = await this.reportRepository.find({
-            where: { client: { id } }
+            where: { client: { id } },
         });
 
         if (!reports) {
-            throw new NotFoundException(`No reports were found for user with ID: ${id}`);
+            throw new NotFoundException(
+                `No reports were found for user with ID: ${id}`,
+            );
         }
 
         try {
@@ -347,42 +398,41 @@ export class ReportsService {
     }
 
     async generateUniqueCode(date: Date): Promise<string> {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
 
-        const datePrefix = `${day}${month}${year}`
+        const datePrefix = `${day}${month}${year}`;
 
         const startOfDay = new Date(date);
-        startOfDay.setHours(0,0,0,0);
+        startOfDay.setHours(0, 0, 0, 0);
 
         const endOfDay = new Date(date);
-        endOfDay.setHours(23,59,59,999);
+        endOfDay.setHours(23, 59, 59, 999);
 
         const lastOrderOfDay = await this.reportRepository
-            .createQueryBuilder('report')
-            .where('report.from_date >= :startOfDay',{ startOfDay})
-            .andWhere('report.from_date <= :endOfDay',{ endOfDay})
-            .andWhere('report.id LIKE :prefix', { prefix: `${datePrefix}-%`})
-            .orderBy('report.id', 'DESC')
-            .getOne()
+            .createQueryBuilder("report")
+            .where("report.from_date >= :startOfDay", { startOfDay })
+            .andWhere("report.from_date <= :endOfDay", { endOfDay })
+            .andWhere("report.id LIKE :prefix", { prefix: `${datePrefix}-%` })
+            .orderBy("report.id", "DESC")
+            .getOne();
 
         let nextNumber = 1;
 
         if (lastOrderOfDay) {
-            const codeParts = lastOrderOfDay.id.split('-');
+            const codeParts = lastOrderOfDay.id.split("-");
 
-            if ( codeParts.length === 2) {
-                const lastNumber = parseInt(codeParts[1])
-                nextNumber = lastNumber + 1
+            if (codeParts.length === 2) {
+                const lastNumber = parseInt(codeParts[1]);
+                nextNumber = lastNumber + 1;
             }
         }
 
-        const formattedNumber = String(nextNumber).padStart(3,'0');
+        const formattedNumber = String(nextNumber).padStart(3, "0");
         const finalCode = `${datePrefix}-${formattedNumber}`;
-        return finalCode
+        return finalCode;
     }
-
 
     @ApiOperation({ summary: "Remove reports for user order" })
     @ApiResponse({ status: 200, description: "Reports removed successfully" })
@@ -391,13 +441,15 @@ export class ReportsService {
     async removeForIdClientOrder(id: string) {
         const reports = await this.reportRepository.find({
             where: {
-                order: { client: { id } }
+                order: { client: { id } },
             },
-            relations: ["order", "order.client"]
+            relations: ["order", "order.client"],
         });
 
         if (!reports) {
-            throw new NotFoundException(`No report found for user with ID: ${id} and the specified order`);
+            throw new NotFoundException(
+                `No report found for user with ID: ${id} and the specified order`,
+            );
         }
 
         try {
@@ -417,6 +469,8 @@ export class ReportsService {
         }
 
         this.logger.error(error);
-        throw new InternalServerErrorException("Unexpected error, check server logs");
+        throw new InternalServerErrorException(
+            "Unexpected error, check server logs",
+        );
     }
 }

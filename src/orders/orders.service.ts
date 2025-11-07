@@ -1,7 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
-import { BadRequestException, forwardRef, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common";
+import {
+    BadRequestException,
+    forwardRef,
+    HttpException,
+    HttpStatus,
+    Inject,
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from "@nestjs/common";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { PaginationDto } from "src/common/dto/pagination.dto";
@@ -13,6 +23,7 @@ import { ClientService } from "src/client/client.service";
 import { TeamService } from "src/team/team.service";
 import { AccessLevel } from "src/client/interfaces/access-level.inteface";
 import { StatusOrder } from "./interface/status-order";
+import { EmailService } from "src/email/email.service";
 
 @ApiTags("Orders")
 @Injectable()
@@ -25,29 +36,34 @@ export class OrdersService {
         private readonly dataSourse: DataSource,
         @Inject(forwardRef(() => ClientService))
         private readonly clientService: ClientService,
-        private readonly teamService: TeamService
-    ) {}
+        private readonly teamService: TeamService,
+        private readonly emailService: EmailService,
+    ) { }
 
     @ApiOperation({ summary: "Create a new order" })
     @ApiResponse({ status: 201 })
     @ApiResponse({ status: 400, description: "Bad request" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async create(_createOrderDto: CreateOrderDto) {
-        const client = await this.clientService.findOnePlain(_createOrderDto.client);
+        const client = await this.clientService.findOnePlain(
+            _createOrderDto.client,
+        );
         const team = await this.teamService.findOnePlain(_createOrderDto.team);
         const { notice_date, ...createOrderDto } = _createOrderDto;
         const id = await this.generateUniqueCode(new Date(notice_date));
 
-        if (client.access_level as AccessLevel === AccessLevel.operator) {
+        if ((client.access_level as AccessLevel) === AccessLevel.operator) {
             if (client.process !== team?.process.name) {
-                throw new BadRequestException("[Client] Client does not belong to the process");
+                throw new BadRequestException(
+                    "[Client] Client does not belong to the process",
+                );
             }
         }
 
         const newOrder = this.orderRepository.create({
-            ...createOrderDto as DeepPartial<Order>,
+            ...(createOrderDto as DeepPartial<Order>),
             id: id,
-            notice_date: notice_date
+            notice_date: notice_date,
         });
 
         try {
@@ -59,13 +75,20 @@ export class OrdersService {
 
             const newRegisterOrder = await this.orderRepository.findOne({
                 where: { id: savedOrder.id },
-                relations: ["client", "team", "team.process"]
+                relations: ["client", "team", "team.process"],
             });
 
             if (!newRegisterOrder) {
-                throw new InternalServerErrorException("Error retrieving created order");
+                throw new InternalServerErrorException(
+                    "Error retrieving created order",
+                );
             }
 
+            await this.emailService.orderRegisterEmail(
+                newRegisterOrder.id,
+                newRegisterOrder.team.name,
+                newRegisterOrder.fault_description,
+            );
             if (!newRegisterOrder.team.process) {
                 return {
                     id: newRegisterOrder.id,
@@ -75,7 +98,7 @@ export class OrdersService {
                     team: newRegisterOrder.team.name,
                     description: newRegisterOrder.fault_description,
                     order_state: newRegisterOrder.order_state,
-                    observation: newRegisterOrder.observation
+                    observation: newRegisterOrder.observation,
                 };
             }
 
@@ -87,7 +110,7 @@ export class OrdersService {
                 team: newRegisterOrder.team.name,
                 description: newRegisterOrder.fault_description,
                 order_state: newRegisterOrder.order_state,
-                observation: newRegisterOrder.observation
+                observation: newRegisterOrder.observation,
             };
         } catch (error) {
             this.handleDbExceptions(error);
@@ -107,14 +130,17 @@ export class OrdersService {
             return [];
         }
 
-        const queryBuilder = this.orderRepository.createQueryBuilder("order")
+        const queryBuilder = this.orderRepository
+            .createQueryBuilder("order")
             .leftJoinAndSelect("order.team", "team")
             .leftJoinAndSelect("order.client", "client")
             .leftJoinAndSelect("team.process", "process")
             .where("1=1");
 
         if (order_state) {
-            queryBuilder.andWhere("order.order_state = :order_state", { order_state });
+            queryBuilder.andWhere("order.order_state = :order_state", {
+                order_state,
+            });
         }
 
         if (team) {
@@ -128,13 +154,13 @@ export class OrdersService {
         if (date_time) {
             const dateObj = new Date(date_time);
             queryBuilder.andWhere("DATE(order.notice_date) = DATE(:date)", {
-                date: dateObj.toISOString()
+                date: dateObj.toISOString(),
             });
         }
 
         const orders = await queryBuilder.getMany();
 
-        return orders.map(order => {
+        return orders.map((order) => {
             if (!order.team.process) {
                 return {
                     id: order.id,
@@ -143,7 +169,7 @@ export class OrdersService {
                     state: order.order_state,
                     client: order.client.username,
                     team: "unassigned",
-                    observation: order.observation
+                    observation: order.observation,
                 };
             }
 
@@ -154,7 +180,7 @@ export class OrdersService {
                 state: order.order_state,
                 client: order.client.username,
                 team: order.team.name,
-                observation: order.observation
+                observation: order.observation,
             };
         });
     }
@@ -167,7 +193,7 @@ export class OrdersService {
         try {
             return this.orderRepository.findOne({
                 where: { id: id },
-                relations: ["team", "client", "team.process"]
+                relations: ["team", "client", "team.process"],
             });
         } catch (error) {
             this.handleDbExceptions(error);
@@ -182,21 +208,21 @@ export class OrdersService {
         try {
             const order = await this.orderRepository.findOne({
                 where: { id: id },
-                relations: ["team", "client", "team.process"]
+                relations: ["team", "client", "team.process"],
             });
-            if(!order) {
-                throw new NotFoundException(`Order with id: ${id} not found`)
+            if (!order) {
+                throw new NotFoundException(`Order with id: ${id} not found`);
             }
 
-            if(order.order_state != StatusOrder.done) {
+            if (order.order_state != StatusOrder.done) {
                 return {
                     id: order?.id,
                     team: order?.team.id,
                     client: order?.client.id,
-                    fault_description: order.fault_description
-                }
+                    fault_description: order.fault_description,
+                };
             } else {
-                return {}
+                return {};
             }
         } catch (error) {
             this.handleDbExceptions(error);
@@ -210,7 +236,9 @@ export class OrdersService {
     @ApiResponse({ status: 500, description: "Internal server error" })
     async update(id: string, _updateOrderDto: UpdateOrderDto) {
         const { notice_date, ...res } = _updateOrderDto;
-        const existingOrder = await this.orderRepository.findOne({ where: { id: id } });
+        const existingOrder = await this.orderRepository.findOne({
+            where: { id: id },
+        });
 
         if (!existingOrder) {
             throw new NotFoundException(`Order with id: ${id} not found`);
@@ -219,7 +247,7 @@ export class OrdersService {
         const orderPreload = await this.orderRepository.preload({
             id: id,
             notice_date: notice_date ? notice_date : existingOrder.notice_date,
-            ...res as DeepPartial<Order>
+            ...(res as DeepPartial<Order>),
         });
 
         if (!orderPreload) {
@@ -249,7 +277,7 @@ export class OrdersService {
                     notice_date: updatedEquipment.notice_date,
                     process: "unassigned",
                     order_state: updatedEquipment.order_state,
-                    observation: updatedEquipment.observation
+                    observation: updatedEquipment.observation,
                 };
             }
 
@@ -261,9 +289,8 @@ export class OrdersService {
                 notice_date: updatedEquipment.notice_date,
                 process: updatedEquipment.team.process.name,
                 order_state: updatedEquipment.order_state,
-                observation: updatedEquipment.observation
+                observation: updatedEquipment.observation,
             };
-
         } catch (error) {
             await queryRunner.rollbackTransaction();
             await queryRunner.release();
@@ -277,7 +304,9 @@ export class OrdersService {
     @ApiResponse({ status: 304, description: "Order already closed" })
     @ApiResponse({ status: 500, description: "Internal server error" })
     async updateStateOrder(order_state: StatusOrder, id: string) {
-        const existingOrder = await this.orderRepository.findOne({ where: { id: id } });
+        const existingOrder = await this.orderRepository.findOne({
+            where: { id: id },
+        });
 
         if (!existingOrder) {
             throw new NotFoundException(`Order with id: ${id} not found`);
@@ -295,7 +324,7 @@ export class OrdersService {
 
         const reportPreload = await this.orderRepository.preload({
             id: id,
-            order_state
+            order_state,
         });
 
         if (!reportPreload) {
@@ -311,7 +340,7 @@ export class OrdersService {
             }
 
             return {
-                order_state: updatedReport.order_state
+                order_state: updatedReport.order_state,
             };
         } catch (error) {
             this.handleDbExceptions(error);
@@ -343,11 +372,13 @@ export class OrdersService {
     @ApiResponse({ status: 500, description: "Internal server error" })
     async removeForClient(id: string) {
         const orders = await this.orderRepository.find({
-            where: { client: { id } }
+            where: { client: { id } },
         });
 
         if (!orders) {
-            throw new NotFoundException(`No orders were found for user with ID: ${id}`);
+            throw new NotFoundException(
+                `No orders were found for user with ID: ${id}`,
+            );
         }
 
         try {
@@ -357,48 +388,46 @@ export class OrdersService {
         }
     }
 
-
     async generateUniqueCode(date: Date): Promise<string> {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
 
-        const datePrefix = `${day}${month}${year}`
+        const datePrefix = `${day}${month}${year}`;
 
         const startOfDay = new Date(date);
-        startOfDay.setHours(0,0,0,0);
+        startOfDay.setHours(0, 0, 0, 0);
 
         const endOfDay = new Date(date);
-        endOfDay.setHours(23,59,59,999);
+        endOfDay.setHours(23, 59, 59, 999);
 
         const lastOrderOfDay = await this.orderRepository
-            .createQueryBuilder('order')
-            .where('order.notice_date >= :startOfDay',{ startOfDay})
-            .andWhere('order.notice_date <= :endOfDay',{ endOfDay})
-            .andWhere('order.id LIKE :prefix', { prefix: `${datePrefix}-%`})
-            .orderBy('order.id', 'DESC')
-            .getOne()
+            .createQueryBuilder("order")
+            .where("order.notice_date >= :startOfDay", { startOfDay })
+            .andWhere("order.notice_date <= :endOfDay", { endOfDay })
+            .andWhere("order.id LIKE :prefix", { prefix: `${datePrefix}-%` })
+            .orderBy("order.id", "DESC")
+            .getOne();
 
         let nextNumber = 1;
 
         if (lastOrderOfDay) {
-            const codeParts = lastOrderOfDay.id.split('-');
+            const codeParts = lastOrderOfDay.id.split("-");
 
-            if ( codeParts.length === 2) {
-                const lastNumber = parseInt(codeParts[1])
-                nextNumber = lastNumber + 1
+            if (codeParts.length === 2) {
+                const lastNumber = parseInt(codeParts[1]);
+                nextNumber = lastNumber + 1;
             }
         }
 
-        const formattedNumber = String(nextNumber).padStart(3,'0');
+        const formattedNumber = String(nextNumber).padStart(3, "0");
         const finalCode = `${datePrefix}-${formattedNumber}`;
-        return finalCode
+        return finalCode;
     }
 
     private handleDbExceptions(error: any) {
-
-        if(error.status === 404 ){
-            throw new NotFoundException(error.message)
+        if (error.status === 404) {
+            throw new NotFoundException(error.message);
         }
 
         if (error.status === 400) {
@@ -414,6 +443,8 @@ export class OrdersService {
         }
 
         this.logger.error(error);
-        throw new InternalServerErrorException("Unexpected error, check server logs");
+        throw new InternalServerErrorException(
+            "Unexpected error, check server logs",
+        );
     }
 }
