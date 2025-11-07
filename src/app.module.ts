@@ -14,7 +14,7 @@ import { Team } from "./team/entities/team.entity";
 import { Order } from "./orders/entities/order.entity";
 import { Report } from "./reports/entities/report.entity";
 import { Client } from "./client/entities/client.entity";
-import { EmailModule } from './email/email.module';
+import { EmailModule } from "./email/email.module";
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { EmailModule } from './email/email.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       entities: [Process, Team, Order, Report, Client],
-      synchronize: true,
+      synchronize: false,
       extra: {
         ssl: process.env.STATE_SSL === "true",
       },
@@ -42,4 +42,4 @@ import { EmailModule } from './email/email.module';
     EmailModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
